@@ -5,7 +5,7 @@ import (
 	"github.com/salamanderman234/peripheral-api/domain"
 	"github.com/salamanderman234/peripheral-api/entity"
 	model "github.com/salamanderman234/peripheral-api/models"
-	utility "github.com/salamanderman234/peripheral-api/utility/log"
+	utility "github.com/salamanderman234/peripheral-api/utility"
 )
 
 type switchService struct {

@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/labstack/echo/v4"
-	utility "github.com/salamanderman234/peripheral-api/utility/log"
+	utility "github.com/salamanderman234/peripheral-api/utility"
 )
 
 func Log(next echo.HandlerFunc) echo.HandlerFunc {

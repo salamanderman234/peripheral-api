@@ -6,7 +6,7 @@ import (
 	"github.com/salamanderman234/peripheral-api/config"
 	"github.com/salamanderman234/peripheral-api/domain"
 	model "github.com/salamanderman234/peripheral-api/models"
-	utility "github.com/salamanderman234/peripheral-api/utility/log"
+	utility "github.com/salamanderman234/peripheral-api/utility"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )

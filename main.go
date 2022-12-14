@@ -8,7 +8,7 @@ import (
 	"github.com/salamanderman234/peripheral-api/repository"
 	route "github.com/salamanderman234/peripheral-api/routes"
 	"github.com/salamanderman234/peripheral-api/service"
-	utility "github.com/salamanderman234/peripheral-api/utility/log"
+	utility "github.com/salamanderman234/peripheral-api/utility"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
@@ -31,7 +31,6 @@ func init() {
 func main() {
 
 	// make connection to database
-	utility.NewLogEntry(nil).Info(config.GetDatabaseUri())
 	client, err := config.ConnectDB(config.GetDatabaseUri())
 	if err != nil {
 		utility.NewLogEntry(nil).Panic(err)

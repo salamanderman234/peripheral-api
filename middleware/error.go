@@ -6,7 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/salamanderman234/peripheral-api/entity"
-	utility "github.com/salamanderman234/peripheral-api/utility/log"
+	utility "github.com/salamanderman234/peripheral-api/utility"
 )
 
 func Error(err error, ctx echo.Context) {
