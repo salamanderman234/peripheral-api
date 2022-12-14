@@ -7,7 +7,7 @@ import (
 )
 
 type Switch struct {
-	ID              primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	ID              primitive.ObjectID `json:"-" bson:"_id,omitempty"`
 	Name            string             `json:"name,omitempty" bson:"name,omitempty"`
 	Manufacturer    string             `json:"manufacturer,omitempty" bson:"manufacturer,omitempty"`
 	Type            string             `json:"type,omitempty" bson:"type,omitempty"`

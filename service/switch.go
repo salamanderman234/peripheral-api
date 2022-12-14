@@ -1,11 +1,12 @@
 package service
 
 import (
+	"encoding/json"
+
 	"github.com/labstack/echo/v4"
 	"github.com/salamanderman234/peripheral-api/domain"
 	"github.com/salamanderman234/peripheral-api/entity"
 	model "github.com/salamanderman234/peripheral-api/models"
-	utility "github.com/salamanderman234/peripheral-api/utility"
 )
 
 type switchService struct {
@@ -18,18 +19,15 @@ func NewSwitchRepository(repo domain.SwitchRepository) domain.SwitchService {
 	}
 }
 
-func (s *switchService) GetSwitch(ctx echo.Context, filter entity.SwitchFilter) (*entity.BaseResponse, error) {
+func (s *switchService) GetSwitch(ctx echo.Context, filter entity.SwitchFilter) ([]byte, error) {
 	filterModel := model.Switch{
 		Type: filter.Type,
 	}
 	switchs, err := s.switchRepo.FindAllSwitchWithFilter(ctx.Request().Context(), filterModel)
 	if err != nil {
-		utility.NewLogEntry(ctx).Error(err)
-		return &entity.BaseResponse{}, err
+		return nil, err
 	}
 
-	return &entity.BaseResponse{
-		Message: "success",
-		Data:    switchs,
-	}, nil
+	switchsParshed, _ := json.Marshal(switchs)
+	return switchsParshed, nil
 }

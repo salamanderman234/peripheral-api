@@ -10,15 +10,25 @@ import (
 )
 
 func Error(err error, ctx echo.Context) {
+	var errorMessage string
 	report, ok := err.(*echo.HTTPError)
+
 	if ok {
-		report.Message = fmt.Sprintf("http error %d - %v", report.Code, report.Message)
+		report.Message = fmt.Sprintf("%v", report.Message)
 	} else {
 		report = echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	utility.NewLogEntry(ctx).Error(report.Message)
+	if report.Code == 404 {
+		errorMessage = "The resource you are trying to reach cannot be found on this server"
+	} else {
+		errorMessage = "Something went wrong"
+	}
+
+	utility.NewLogEntry(ctx).Error(fmt.Sprintf("%d - %s", report.Code, report.Message))
 	ctx.JSON(report.Code, entity.BaseResponse{
-		Error: report.Message.(string),
+		Code:   report.Code,
+		Status: report.Message.(string),
+		Errors: errorMessage,
 	})
 }

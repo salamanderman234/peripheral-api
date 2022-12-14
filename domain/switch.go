@@ -17,7 +17,7 @@ type SwitchRepository interface {
 }
 
 type SwitchService interface {
-	GetSwitch(ctx echo.Context, filter entity.SwitchFilter) (*entity.BaseResponse, error)
+	GetSwitch(ctx echo.Context, filter entity.SwitchFilter) ([]byte, error)
 }
 
 type SwitchRouter interface {

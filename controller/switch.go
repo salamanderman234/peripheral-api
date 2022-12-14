@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/salamanderman234/peripheral-api/domain"
@@ -20,14 +22,47 @@ func NewSwitchController(service domain.SwitchService) *switchController {
 }
 
 func (s *switchController) GetAllSwitch(ctx echo.Context) error {
-	result, err := s.service.GetSwitch(ctx, entity.SwitchFilter{})
-	if err != nil {
-		utility.NewLogEntry(ctx).Error("500 - internal server error")
-		return ctx.JSON(http.StatusInternalServerError, entity.BaseResponse{
-			Message: "failed",
-			Error:   "internal server error",
-		})
+	// init
+	var switchFilter entity.SwitchFilter
+	var switchs []entity.Switch
+	var response entity.BaseResponse
+	// get type query
+	switchType := ctx.QueryParam("type")
+	if switchType != "" {
+		switchFilter.Type = switchType
 	}
 
-	return ctx.JSON(http.StatusOK, result)
+	manufacturer := ctx.QueryParam("manufacturer")
+	if manufacturer != "" {
+		switchFilter.Type = switchType
+	}
+
+	actuationForce, err := strconv.ParseFloat(ctx.QueryParam("actuation_force"), 64)
+	if err == nil {
+		switchFilter.ActuationForce = actuationForce
+	}
+
+	result, err := s.service.GetSwitch(ctx, switchFilter)
+	if err != nil {
+		utility.NewLogEntry(ctx).Error(err)
+		response.Status = "internal server error"
+		response.Code = http.StatusInternalServerError
+	} else {
+		// convert result to array of entitiy.switch
+		json.Unmarshal(result, &switchs)
+
+		if len(switchs) == 0 {
+			utility.NewLogEntry(ctx).Error("404 - Not Found")
+			response.Status = "Not Found"
+			response.Code = http.StatusNotFound
+			response.Errors = "No matching data for the given query"
+		} else {
+			utility.NewLogEntry(ctx).Info("200 - Success")
+			response.Status = "Ok"
+			response.Code = http.StatusOK
+			response.Data = switchs
+		}
+	}
+
+	return ctx.JSON(response.Code, response)
 }
