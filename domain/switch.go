@@ -16,5 +16,5 @@ type SwitchRepository interface {
 }
 
 type SwitchService interface {
-	GetSwitch(ctx context.Context, filter map[string]string) ([]entity.BaseResponse, error)
+	GetSwitch(ctx context.Context, filter entity.SwitchFilter) (*entity.BaseResponse, error)
 }
