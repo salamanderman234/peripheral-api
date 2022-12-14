@@ -3,6 +3,7 @@ package domain
 import (
 	"context"
 
+	"github.com/labstack/echo/v4"
 	"github.com/salamanderman234/peripheral-api/entity"
 	model "github.com/salamanderman234/peripheral-api/models"
 )
@@ -16,5 +17,10 @@ type SwitchRepository interface {
 }
 
 type SwitchService interface {
-	GetSwitch(ctx context.Context, filter entity.SwitchFilter) (*entity.BaseResponse, error)
+	GetSwitch(ctx echo.Context, filter entity.SwitchFilter) (*entity.BaseResponse, error)
+}
+
+type SwitchRouter interface {
+	RegisterRoutes()
+	CreateNewURL(str string) string
 }

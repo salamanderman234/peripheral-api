@@ -1,8 +1,7 @@
 package service
 
 import (
-	"context"
-
+	"github.com/labstack/echo/v4"
 	"github.com/salamanderman234/peripheral-api/domain"
 	"github.com/salamanderman234/peripheral-api/entity"
 	model "github.com/salamanderman234/peripheral-api/models"
@@ -19,13 +18,13 @@ func NewSwitchRepository(repo domain.SwitchRepository) domain.SwitchService {
 	}
 }
 
-func (s *switchService) GetSwitch(ctx context.Context, filter entity.SwitchFilter) (*entity.BaseResponse, error) {
+func (s *switchService) GetSwitch(ctx echo.Context, filter entity.SwitchFilter) (*entity.BaseResponse, error) {
 	filterModel := model.Switch{
 		Type: filter.Type,
 	}
-	switchs, err := s.switchRepo.FindAllSwitchWithFilter(ctx, filterModel)
+	switchs, err := s.switchRepo.FindAllSwitchWithFilter(ctx.Request().Context(), filterModel)
 	if err != nil {
-		utility.NewLogEntry(nil).Error(err)
+		utility.NewLogEntry(ctx).Error(err)
 		return &entity.BaseResponse{}, err
 	}
 

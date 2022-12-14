@@ -17,11 +17,11 @@ const (
 
 func GetDatabaseUri() string {
 	driver := viper.GetString("database.driver")
-	username := viper.GetString("database.username")
-	pass := viper.GetString("database.password")
+	// username := viper.GetString("database.username")
+	// pass := viper.GetString("database.password")
 	host := viper.GetString("database.host")
 	port := viper.GetString("database.port")
-	return fmt.Sprintf("%s://%s:%s@%s%s/?maxPoolSize=20&w=majority", driver, username, pass, host, port)
+	return fmt.Sprintf("%s://%s:%s/?maxPoolSize=20&w=majority", driver, host, port)
 }
 
 func GetDatabaseName() string {
