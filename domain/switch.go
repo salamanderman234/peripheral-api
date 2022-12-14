@@ -24,3 +24,7 @@ type SwitchRouter interface {
 	RegisterRoutes()
 	CreateNewURL(str string) string
 }
+
+type SwitchController interface {
+	GetAllSwitch(ctx echo.Context) error
+}

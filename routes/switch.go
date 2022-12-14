@@ -4,17 +4,16 @@ import (
 	"fmt"
 
 	"github.com/labstack/echo/v4"
-	"github.com/salamanderman234/peripheral-api/controller"
 	"github.com/salamanderman234/peripheral-api/domain"
 )
 
 type switchRoute struct {
 	router  *echo.Echo
-	con     *controller.SwitchController
+	con     domain.SwitchController
 	baseUrl string
 }
 
-func NewSwitchRoute(router *echo.Echo, con *controller.SwitchController) domain.SwitchRouter {
+func NewSwitchRoute(router *echo.Echo, con domain.SwitchController) domain.SwitchRouter {
 	return &switchRoute{
 		router:  router,
 		con:     con,

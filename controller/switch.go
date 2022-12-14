@@ -9,17 +9,17 @@ import (
 	utility "github.com/salamanderman234/peripheral-api/utility"
 )
 
-type SwitchController struct {
+type switchController struct {
 	service domain.SwitchService
 }
 
-func NewSwitchController(service domain.SwitchService) *SwitchController {
-	return &SwitchController{
+func NewSwitchController(service domain.SwitchService) *switchController {
+	return &switchController{
 		service: service,
 	}
 }
 
-func (s *SwitchController) GetAllSwitch(ctx echo.Context) error {
+func (s *switchController) GetAllSwitch(ctx echo.Context) error {
 	result, err := s.service.GetSwitch(ctx, entity.SwitchFilter{})
 	if err != nil {
 		utility.NewLogEntry(ctx).Error("500 - internal server error")
