@@ -26,22 +26,22 @@ func (s *switchController) GetAllSwitch(ctx echo.Context) error {
 	var switchFilter entity.SwitchFilter
 	var switchs []entity.Switch
 	var response entity.BaseResponse
-	// get type query
+
+	// get query for filter
 	switchType := ctx.QueryParam("type")
 	if switchType != "" {
 		switchFilter.Type = switchType
 	}
-
 	manufacturer := ctx.QueryParam("manufacturer")
 	if manufacturer != "" {
 		switchFilter.Type = switchType
 	}
-
 	actuationForce, err := strconv.ParseFloat(ctx.QueryParam("actuation_force"), 64)
 	if err == nil {
 		switchFilter.ActuationForce = actuationForce
 	}
 
+	// calling service
 	result, err := s.service.GetSwitch(ctx, switchFilter)
 	if err != nil {
 		utility.NewLogEntry(ctx).Error(err)
@@ -63,6 +63,6 @@ func (s *switchController) GetAllSwitch(ctx echo.Context) error {
 			response.Data = switchs
 		}
 	}
-
+	// sending response
 	return ctx.JSON(response.Code, response)
 }

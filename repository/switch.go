@@ -8,6 +8,7 @@ import (
 	model "github.com/salamanderman234/peripheral-api/models"
 	utility "github.com/salamanderman234/peripheral-api/utility"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -37,21 +38,35 @@ func (s *switchRepository) DeleteSwitch(ctx context.Context, condition model.Swi
 	return nil
 }
 
-func (s *switchRepository) FindAllSwitchWithFilter(ctx context.Context, filter model.Switch) ([]model.Switch, error) {
+func (s *switchRepository) FindAllSwitchWithFilter(ctx context.Context, switchType string, switchManufacturer string, acforce float64) ([]model.Switch, error) {
 
 	var switchs []model.Switch
 
+	// making filter
 	collection := s.client.Database(config.GetDatabaseName()).Collection(config.SwitchsCollection)
-	filterBSON, _ := bson.Marshal(filter)
+	filter := bson.D{}
+	if switchType != "" {
+		filter = append(filter, primitive.E{Key: "type", Value: switchType})
+	}
+	if switchManufacturer != "" {
+		filter = append(filter, primitive.E{Key: "manufacturer", Value: switchManufacturer})
+	}
+	if acforce != 0.0 {
+		filter = append(filter, primitive.E{Key: "actuation_force(g)", Value: bson.D{
+			primitive.E{Key: "$lte", Value: acforce},
+		}})
+	}
 
-	cur, err := collection.Find(ctx, filterBSON, nil)
+	// query
+	cur, err := collection.Find(ctx, filter, nil)
 	if err != nil {
-		utility.NewLogEntry(nil).Error("failed to get data from switch collection in switch repository")
+		utility.NewLogEntry(nil).Error("Failed to get data from switch collection in switch repository")
 		return switchs, err
 	}
 
+	// to result
 	if err = cur.All(ctx, &switchs); err != nil {
-		utility.NewLogEntry(nil).Error("failed to decode data from cursor collections in switch repository")
+		utility.NewLogEntry(nil).Error("Failed to decode data from cursor collections in switch repository")
 		return switchs, err
 	}
 
