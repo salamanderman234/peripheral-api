@@ -9,6 +9,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+const (
+	SwitchsCollection  = "switchs"
+	KeyboardCollection = "keyboards"
+	MouseCollection    = "mouses"
+)
+
 func GetDatabaseUri() string {
 	driver := viper.GetString("database.driver")
 	username := viper.GetString("database.username")
@@ -16,6 +22,10 @@ func GetDatabaseUri() string {
 	host := viper.GetString("database.host")
 	port := viper.GetString("database.port")
 	return fmt.Sprintf("%s://%s:%s@%s%s/?maxPoolSize=20&w=majority", driver, username, pass, host, port)
+}
+
+func GetDatabaseName() string {
+	return viper.GetString("database.name")
 }
 
 func ConnectDB(uri string) (*mongo.Client, error) {
