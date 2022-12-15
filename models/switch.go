@@ -5,7 +5,7 @@ import (
 )
 
 type Switch struct {
-	Id              int       `json:"switch_id,omitempty" bson:"switch_id,omitempty"`
+	Slug            string    `json:"slug,omitempty" bson:"slug,omitempty"`
 	Name            string    `json:"name,omitempty" bson:"name,omitempty"`
 	Manufacturer    string    `json:"manufacturer,omitempty" bson:"manufacturer,omitempty"`
 	Type            string    `json:"type,omitempty" bson:"type,omitempty"`
