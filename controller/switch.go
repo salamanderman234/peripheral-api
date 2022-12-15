@@ -32,59 +32,73 @@ func (s *switchController) GetAllSwitch(ctx echo.Context) error {
 	// calling service
 	result, err := s.service.GetSwitch(ctx.Request().Context(), switchFilter)
 	if err != nil {
-		utility.NewLogEntry(ctx).Error(err)
-		response.Status = "Internal Server Error"
-		response.Code = http.StatusInternalServerError
-		response.Errors = "Something Went Wrong"
-	} else {
-		// convert result to array of entitiy.switch
-		json.Unmarshal(result, &switchs)
-
-		if len(switchs) == 0 {
-			utility.NewLogEntry(ctx).Error("404 - Not Found")
-			response.Status = "Not Found"
-			response.Code = http.StatusNotFound
-			response.Errors = "No matching data for the given query"
-		} else {
-			utility.NewLogEntry(ctx).Info("200 - Success")
-			response.Status = "Ok"
-			response.Code = http.StatusOK
-			response.Data = switchs
-		}
+		go utility.NewLogEntry(ctx).Error("500 - Internal Server Error")
+		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
+			Status: "Internal Server Error",
+			Code:   http.StatusInternalServerError,
+			Errors: "Something Went Wrong",
+		})
 	}
+	// convert result to array of entitiy.switch
+	json.Unmarshal(result, &switchs)
+
+	if len(switchs) == 0 {
+		go utility.NewLogEntry(ctx).Error("404 - Not Found")
+		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
+			Status: "Not Found",
+			Code:   http.StatusNotFound,
+			Errors: "No matching data for the given query",
+		})
+	}
+
 	// sending response
-	return ctx.JSON(response.Code, response)
+	go utility.NewLogEntry(ctx).Info("200 - Success")
+	return ctx.JSON(response.Code, entity.BaseResponse{
+		Status: "Ok",
+		Code:   http.StatusOK,
+		Data:   switchs,
+	})
 }
 
 func (s *switchController) CreateNewSwitch(ctx echo.Context) error {
 	// init
 	var switchsBody []entity.Switch
-	var response entity.BaseResponse
 
 	// binding
 	if err := ctx.Bind(&switchsBody); err != nil {
 		utility.NewLogEntry(ctx).Error("400 - Bad Request")
-		response.Status = "Bad Request"
-		response.Code = http.StatusBadRequest
-		response.Errors = "Data body does not match specifications"
-
-	} else {
-
-		// calling service
-		err := s.service.CreateSwitch(ctx.Request().Context(), switchsBody)
-		// error while parsing body
-		if err != nil {
-			utility.NewLogEntry(ctx).Error("500 - Internal Server Error")
-			response.Status = "internal Server Error"
-			response.Code = http.StatusBadRequest
-			response.Errors = "Something Went Wrong"
-		} else {
-			utility.NewLogEntry(ctx).Info("201 - Created")
-			response.Status = "Created"
-			response.Code = http.StatusCreated
-		}
-
+		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
+			Status: "Bad Request",
+			Code:   http.StatusBadRequest,
+			Errors: "Data body does not match specifications",
+		})
 	}
+
+	// calling service
+	policy, err := s.service.CreateSwitch(ctx.Request().Context(), switchsBody)
+	// checking policy
+	if policy != nil {
+		go utility.NewLogEntry(ctx).Error("400 - Bad Request")
+		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
+			Status: "Bad Request",
+			Code:   http.StatusBadRequest,
+			Errors: policy,
+		})
+	}
+	// error while parsing body
+	if err != nil {
+		go utility.NewLogEntry(ctx).Error("500 - Internal Server Error")
+		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
+			Status: "Internal Server Error",
+			Code:   http.StatusInternalServerError,
+			Errors: "Something Went Wrong",
+		})
+	}
+
 	// return response
-	return ctx.JSON(response.Code, response)
+	go utility.NewLogEntry(ctx).Info("201 - Created")
+	return ctx.JSON(http.StatusOK, entity.BaseResponse{
+		Status: "Created",
+		Code:   http.StatusOK,
+	})
 }

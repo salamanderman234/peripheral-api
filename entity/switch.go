@@ -1,6 +1,7 @@
 package entity
 
 type Switch struct {
+	Id              int      `json:"switch_id,omitempty" bson:"switch_id,omitempty"`
 	Name            string   `json:"name,omitempty" query:"name"`
 	Manufacturer    string   `json:"manufacturer,omitempty" query:"manufacturer"`
 	Type            string   `json:"type,omitempty" query:"type"`
