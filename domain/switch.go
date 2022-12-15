@@ -14,7 +14,7 @@ type SwitchRepository interface {
 	BatchInsertSwitchs(ctx context.Context, switchs []model.Switch) error
 	UpdateSwitch(ctx context.Context, updateField model.Switch, condition model.Switch) error
 	DeleteSwitch(ctx context.Context, condition model.Switch) error
-	FindAllSwitchWithFilter(ctx context.Context, switchType string, switchManufacturer string, acforce float64) ([]model.Switch, error)
+	FindAllSwitchWithFilter(ctx context.Context, switchType string, switchManufacturer string, acforce float64, slug string) ([]model.Switch, error)
 }
 
 type SwitchService interface {
@@ -25,5 +25,6 @@ type SwitchService interface {
 
 type SwitchController interface {
 	GetAllSwitch(ctx echo.Context) error
+	GetOneSwitch(ctx echo.Context) error
 	CreateNewSwitch(ctx echo.Context) error
 }

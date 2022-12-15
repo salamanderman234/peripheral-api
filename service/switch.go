@@ -22,7 +22,7 @@ func NewSwitchService(repo domain.SwitchRepository) domain.SwitchService {
 }
 
 func (s *switchService) GetSwitch(ctx context.Context, filter entity.Switch) ([]byte, error) {
-	switchs, err := s.switchRepo.FindAllSwitchWithFilter(ctx, filter.Type, filter.Manufacturer, filter.ActuationForce)
+	switchs, err := s.switchRepo.FindAllSwitchWithFilter(ctx, filter.Type, filter.Manufacturer, filter.ActuationForce, filter.Slug)
 	if err != nil {
 		return nil, err
 	}

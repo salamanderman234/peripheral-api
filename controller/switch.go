@@ -20,6 +20,34 @@ func NewSwitchController(service domain.SwitchService) *switchController {
 	}
 }
 
+func (s *switchController) GetOneSwitch(ctx echo.Context) error {
+	var filter entity.Switch
+	var foundSwitch []entity.Switch
+	filter.Slug = ctx.Param("slug")
+
+	// calling service
+	result, err := s.service.GetSwitch(ctx.Request().Context(), filter)
+	if err != nil {
+		go utility.NewLogEntry(ctx).Error("500 - Internal Server Error")
+		return ctx.JSON(http.StatusInternalServerError, entity.BaseResponse{
+			Code:   http.StatusInternalServerError,
+			Status: "Internal Server Error",
+			Errors: "Something went wrong",
+		})
+	}
+
+	// decode
+	json.Unmarshal(result, &foundSwitch)
+
+	// return response
+	go utility.NewLogEntry(ctx).Error("500 - Internal Server Error")
+	return ctx.JSON(http.StatusOK, entity.BaseResponse{
+		Code:   http.StatusOK,
+		Status: "Ok",
+		Data:   foundSwitch,
+	})
+}
+
 func (s *switchController) GetAllSwitch(ctx echo.Context) error {
 	// init
 	var switchFilter entity.Switch

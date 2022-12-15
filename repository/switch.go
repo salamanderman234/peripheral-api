@@ -55,12 +55,15 @@ func (s *switchRepository) DeleteSwitch(ctx context.Context, condition model.Swi
 	return nil
 }
 
-func (s *switchRepository) FindAllSwitchWithFilter(ctx context.Context, switchType string, switchManufacturer string, acforce float64) ([]model.Switch, error) {
+func (s *switchRepository) FindAllSwitchWithFilter(ctx context.Context, switchType string, switchManufacturer string, acforce float64, slug string) ([]model.Switch, error) {
 
 	var switchs []model.Switch
 
 	// making filter
 	filter := bson.D{}
+	if slug != "" {
+		filter = append(filter, primitive.E{Key: "slug", Value: slug})
+	}
 	if switchType != "" {
 		filter = append(filter, primitive.E{Key: "type", Value: switchType})
 	}
