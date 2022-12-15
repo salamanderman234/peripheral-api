@@ -11,17 +11,17 @@ import (
 
 type SwitchRepository interface {
 	InsertSwitch(ctx context.Context, newSwitch model.Switch) error
-	BatchInsertSwitchs(ctx context.Context, switchs []model.Switch) error
-	UpdateSwitch(ctx context.Context, updateField model.Switch, filter model.Switch) error
+	BatchInsertSwitchs(ctx context.Context, switchs []model.Switch) ([]interface{}, error)
+	UpdateSwitch(ctx context.Context, updateField model.Switch, filter model.Switch) (int64, error)
 	DeleteSwitch(ctx context.Context, condition model.Switch) error
 	FindAllSwitchWithFilter(ctx context.Context, switchType string, switchManufacturer string, acforce float64, slug string) ([]model.Switch, error)
 }
 
 type SwitchService interface {
 	GetSwitch(ctx context.Context, filter entity.Switch) ([]byte, error)
-	CreateSwitch(ctx context.Context, switchs []entity.Switch) (*[]*policy.SwitchPolicy, error)
+	CreateSwitch(ctx context.Context, switchs []entity.Switch) ([]interface{}, *[]*policy.SwitchPolicy, error)
 	CreateOneSwitch(ctx context.Context, switchEntity entity.Switch) error
-	UpdateSwitch(ctx context.Context, updateField entity.Switch, filter entity.Switch) ([]byte, error)
+	UpdateSwitch(ctx context.Context, updateField entity.Switch, filter entity.Switch) (int64, error)
 }
 
 type SwitchController interface {

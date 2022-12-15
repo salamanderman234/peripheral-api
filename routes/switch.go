@@ -30,4 +30,5 @@ func (s *switchRoute) RegisterRoutes() {
 	s.router.GET(s.CreateNewURL(""), s.con.GetAllSwitch)
 	s.router.GET(s.CreateNewURL("/:slug"), s.con.GetOneSwitch)
 	s.router.POST(s.CreateNewURL(""), s.con.CreateNewSwitch)
+	s.router.PATCH(s.CreateNewURL("/:slug"), s.con.UpdateOneSwitch)
 }

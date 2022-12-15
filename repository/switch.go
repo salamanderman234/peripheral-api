@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/salamanderman234/peripheral-api/config"
@@ -29,13 +30,13 @@ func NewSwitchRepository(connection *mongo.Client) domain.SwitchRepository {
 func (s *switchRepository) InsertSwitch(ctx context.Context, newSwitch model.Switch) error {
 	_, err := s.collection.InsertOne(ctx, newSwitch)
 	if err != nil {
-		utility.NewLogEntry(nil).Error("Failed to insert data to switch collection in switch repository")
+		utility.NewLogEntry(nil).Error(err)
 		return err
 	}
 	return nil
 }
 
-func (s *switchRepository) BatchInsertSwitchs(ctx context.Context, switchs []model.Switch) error {
+func (s *switchRepository) BatchInsertSwitchs(ctx context.Context, switchs []model.Switch) ([]interface{}, error) {
 	var switchsInterface []interface{}
 	for _, element := range switchs {
 		now := time.Now().Format(time.RFC1123)
@@ -43,17 +44,31 @@ func (s *switchRepository) BatchInsertSwitchs(ctx context.Context, switchs []mod
 		element.UpdateAt = now
 		switchsInterface = append(switchsInterface, element)
 	}
-	_, err := s.collection.InsertMany(ctx, switchsInterface)
+	result, err := s.collection.InsertMany(ctx, switchsInterface)
 	if err != nil {
-		utility.NewLogEntry(nil).Error("Failed to insert data to switch collection in switch repository")
-		return err
+		utility.NewLogEntry(nil).Error(err)
+		return result.InsertedIDs, err
 	}
-	return nil
+	return result.InsertedIDs, nil
 }
 
-func (s *switchRepository) UpdateSwitch(ctx context.Context, updateField model.Switch, filter model.Switch) error {
+func (s *switchRepository) UpdateSwitch(ctx context.Context, updateField model.Switch, filter model.Switch) (int64, error) {
+	// set bson update field and filter
+	filterBson := bson.D{
+		primitive.E{Key: "slug", Value: filter.Slug},
+	}
+	setBson := bson.D{
+		primitive.E{Key: "$set", Value: updateField},
+	}
+	// query
+	result, err := s.collection.UpdateMany(ctx, filterBson, setBson)
+	fmt.Println("match modifi", result.MatchedCount, result.ModifiedCount)
 
-	return nil
+	if err != nil {
+		utility.NewLogEntry(nil).Error(err)
+		return 0, err
+	}
+	return result.ModifiedCount, nil
 }
 
 func (s *switchRepository) DeleteSwitch(ctx context.Context, condition model.Switch) error {

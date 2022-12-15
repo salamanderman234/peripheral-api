@@ -31,7 +31,7 @@ func (s *switchService) GetSwitch(ctx context.Context, filter entity.Switch) ([]
 	return switchsParshed, nil
 }
 
-func (s *switchService) CreateSwitch(ctx context.Context, switchs []entity.Switch) (*[]*policy.SwitchPolicy, error) {
+func (s *switchService) CreateSwitch(ctx context.Context, switchs []entity.Switch) ([]interface{}, *[]*policy.SwitchPolicy, error) {
 	var switchsModel []model.Switch
 	var policyResult []*policy.SwitchPolicy
 
@@ -47,7 +47,7 @@ func (s *switchService) CreateSwitch(ctx context.Context, switchs []entity.Switc
 	}
 
 	if len(policyResult) != 0 {
-		return &policyResult, nil
+		return nil, &policyResult, nil
 	}
 
 	// convert entity to model
@@ -55,12 +55,12 @@ func (s *switchService) CreateSwitch(ctx context.Context, switchs []entity.Switc
 	json.Unmarshal(jsonSwitchs, &switchsModel)
 
 	// calling repo
-	err := s.switchRepo.BatchInsertSwitchs(ctx, switchsModel)
+	insertedId, err := s.switchRepo.BatchInsertSwitchs(ctx, switchsModel)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return nil, nil
+	return insertedId, nil, nil
 }
 
 func (s *switchService) CreateOneSwitch(ctx context.Context, switchEntity entity.Switch) error {
@@ -77,6 +77,24 @@ func (s *switchService) CreateOneSwitch(ctx context.Context, switchEntity entity
 	return nil
 }
 
-func (s *switchService) UpdateSwitch(ctx context.Context, updateField entity.Switch, filter entity.Switch) ([]byte, error) {
-	return nil, nil
+func (s *switchService) UpdateSwitch(ctx context.Context, updateField entity.Switch, filter entity.Switch) (int64, error) {
+	var updateFieldModel model.Switch
+	var filterModel model.Switch
+
+	// creating new slug if there any new name
+	if updateField.Name != "" {
+		updateField.Slug = strings.Join(strings.Split(strings.ToLower(updateField.Name), " "), "-")
+	}
+	// convert to model
+	temp, _ := json.Marshal(updateField)
+	json.Unmarshal(temp, &updateFieldModel)
+	temp, _ = json.Marshal(filter)
+	json.Unmarshal(temp, &filterModel)
+
+	// calling repo
+	modifiedDocument, err := s.switchRepo.UpdateSwitch(ctx, updateFieldModel, filterModel)
+	if err != nil {
+		return 0, err
+	}
+	return modifiedDocument, nil
 }
