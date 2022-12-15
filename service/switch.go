@@ -8,7 +8,6 @@ import (
 	"github.com/salamanderman234/peripheral-api/domain"
 	"github.com/salamanderman234/peripheral-api/entity"
 	model "github.com/salamanderman234/peripheral-api/models"
-	"github.com/salamanderman234/peripheral-api/policy"
 )
 
 type switchService struct {
@@ -31,23 +30,12 @@ func (s *switchService) GetSwitch(ctx context.Context, filter entity.Switch) ([]
 	return switchsParshed, nil
 }
 
-func (s *switchService) CreateSwitch(ctx context.Context, switchs []entity.Switch) ([]interface{}, *[]*policy.SwitchPolicy, error) {
+func (s *switchService) CreateSwitch(ctx context.Context, switchs []entity.Switch) ([]interface{}, error) {
 	var switchsModel []model.Switch
-	var policyResult []*policy.SwitchPolicy
 
 	// checking policy
 	for i := 0; i < len(switchs); i++ {
-		result := policy.InsertSwitchPolicy(switchs[i])
-		if result != nil {
-			policyResult = append(policyResult, result)
-		} else {
-			// make slug
-			switchs[i].Slug = strings.Join(strings.Split(strings.ToLower(switchs[i].Name), " "), "-")
-		}
-	}
-
-	if len(policyResult) != 0 {
-		return nil, &policyResult, nil
+		switchs[i].Slug = strings.Join(strings.Split(strings.ToLower(switchs[i].Name), " "), "-")
 	}
 
 	// convert entity to model
@@ -57,10 +45,10 @@ func (s *switchService) CreateSwitch(ctx context.Context, switchs []entity.Switc
 	// calling repo
 	insertedId, err := s.switchRepo.BatchInsertSwitchs(ctx, switchsModel)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return insertedId, nil, nil
+	return insertedId, nil
 }
 
 func (s *switchService) CreateOneSwitch(ctx context.Context, switchEntity entity.Switch) error {

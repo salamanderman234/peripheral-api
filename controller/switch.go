@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/salamanderman234/peripheral-api/domain"
 	"github.com/salamanderman234/peripheral-api/entity"
+	"github.com/salamanderman234/peripheral-api/policy"
 	utility "github.com/salamanderman234/peripheral-api/utility"
 )
 
@@ -91,10 +92,11 @@ func (s *switchController) GetAllSwitch(ctx echo.Context) error {
 
 func (s *switchController) CreateNewSwitch(ctx echo.Context) error {
 	// init
-	var switchsBody []entity.Switch
+	var body []entity.Switch
+	var policyResult []*policy.SwitchPolicy
 
 	// binding
-	if err := ctx.Bind(&switchsBody); err != nil {
+	if err := ctx.Bind(&body); err != nil {
 		go utility.NewLogEntry(ctx).Error("400 - Bad Request")
 		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
 			Status: "Bad Request",
@@ -102,18 +104,24 @@ func (s *switchController) CreateNewSwitch(ctx echo.Context) error {
 			Errors: "Data body does not match specifications",
 		})
 	}
-
-	// calling service
-	insertedIds, policy, err := s.service.CreateSwitch(ctx.Request().Context(), switchsBody)
-	// checking policy
-	if policy != nil {
+	// checking input policy
+	for _, element := range body {
+		result := policy.DocumentSwitchPolicy(ctx.Request().Context(), element, s.service)
+		if result != nil {
+			policyResult = append(policyResult, result)
+		}
+	}
+	if len(policyResult) != 0 {
 		go utility.NewLogEntry(ctx).Error("400 - Bad Request")
 		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
 			Status: "Bad Request",
 			Code:   http.StatusBadRequest,
-			Errors: policy,
+			Errors: policyResult,
 		})
 	}
+
+	// calling service
+	insertedIds, err := s.service.CreateSwitch(ctx.Request().Context(), body)
 	// error while parsing body
 	if err != nil {
 		go utility.NewLogEntry(ctx).Error("500 - Internal Server Error")

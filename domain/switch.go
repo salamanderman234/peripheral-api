@@ -6,7 +6,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/salamanderman234/peripheral-api/entity"
 	model "github.com/salamanderman234/peripheral-api/models"
-	"github.com/salamanderman234/peripheral-api/policy"
 )
 
 type SwitchRepository interface {
@@ -19,7 +18,7 @@ type SwitchRepository interface {
 
 type SwitchService interface {
 	GetSwitch(ctx context.Context, filter entity.Switch) ([]byte, error)
-	CreateSwitch(ctx context.Context, switchs []entity.Switch) ([]interface{}, *[]*policy.SwitchPolicy, error)
+	CreateSwitch(ctx context.Context, switchs []entity.Switch) ([]interface{}, error)
 	CreateOneSwitch(ctx context.Context, switchEntity entity.Switch) error
 	UpdateSwitch(ctx context.Context, updateField entity.Switch, filter entity.Switch) (int64, error)
 }
