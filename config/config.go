@@ -24,6 +24,13 @@ func GetDatabaseUri() string {
 	return fmt.Sprintf("%s://%s:%s/?maxPoolSize=20&w=majority", driver, host, port)
 }
 
+func CreateAppPath(path string) string {
+	appUrl := viper.GetString("app.url")
+	appVersion := viper.GetString("app.version")
+
+	return fmt.Sprintf("%s/v%s%s", appUrl, appVersion, path)
+}
+
 func GetDatabaseName() string {
 	return viper.GetString("database.name")
 }

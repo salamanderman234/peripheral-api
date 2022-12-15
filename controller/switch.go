@@ -3,7 +3,6 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/salamanderman234/peripheral-api/domain"
@@ -23,26 +22,15 @@ func NewSwitchController(service domain.SwitchService) *switchController {
 
 func (s *switchController) GetAllSwitch(ctx echo.Context) error {
 	// init
-	var switchFilter entity.SwitchFilter
+	var switchFilter entity.Switch
 	var switchs []entity.Switch
 	var response entity.BaseResponse
 
-	// get query for filter
-	switchType := ctx.QueryParam("type")
-	if switchType != "" {
-		switchFilter.Type = switchType
-	}
-	manufacturer := ctx.QueryParam("manufacturer")
-	if manufacturer != "" {
-		switchFilter.Type = switchType
-	}
-	actuationForce, err := strconv.ParseFloat(ctx.QueryParam("actuation_force"), 64)
-	if err == nil {
-		switchFilter.ActuationForce = actuationForce
-	}
+	// get filter from query, body or path params
+	ctx.Bind(&switchFilter)
 
 	// calling service
-	result, err := s.service.GetSwitch(ctx, switchFilter)
+	result, err := s.service.GetSwitch(ctx.Request().Context(), switchFilter)
 	if err != nil {
 		utility.NewLogEntry(ctx).Error(err)
 		response.Status = "internal server error"
@@ -64,5 +52,22 @@ func (s *switchController) GetAllSwitch(ctx echo.Context) error {
 		}
 	}
 	// sending response
+	return ctx.JSON(response.Code, response)
+}
+
+func (s *switchController) CreateNewSwitch(ctx echo.Context) error {
+	// init
+	var switchsBody []entity.Switch
+	var response entity.BaseResponse
+
+	// binding
+	if err := ctx.Bind(switchsBody); err != nil {
+		utility.NewLogEntry(ctx).Error("400 - Bad Request")
+		response.Status = "Bad Request"
+		response.Code = http.StatusBadRequest
+		response.Errors = "Data body does not match specifications"
+	} else {
+
+	}
 	return ctx.JSON(response.Code, response)
 }

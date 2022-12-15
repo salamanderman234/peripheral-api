@@ -17,14 +17,11 @@ type SwitchRepository interface {
 }
 
 type SwitchService interface {
-	GetSwitch(ctx echo.Context, filter entity.SwitchFilter) ([]byte, error)
-}
-
-type SwitchRouter interface {
-	RegisterRoutes()
-	CreateNewURL(str string) string
+	GetSwitch(ctx context.Context, filter entity.Switch) ([]byte, error)
+	CreateSwitch(ctx context.Context, switchs []entity.Switch) error
 }
 
 type SwitchController interface {
 	GetAllSwitch(ctx echo.Context) error
+	CreateNewSwitch(ctx echo.Context) error
 }

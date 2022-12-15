@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/salamanderman234/peripheral-api/config"
 	"github.com/salamanderman234/peripheral-api/controller"
+	"github.com/salamanderman234/peripheral-api/domain"
 	"github.com/salamanderman234/peripheral-api/middleware"
 	"github.com/salamanderman234/peripheral-api/repository"
 	route "github.com/salamanderman234/peripheral-api/routes"
@@ -46,8 +47,11 @@ func main() {
 	router.Use(middleware.Log)
 
 	// router handler
-	switchRoutes := route.NewSwitchRoute(router, switchController)
-	switchRoutes.RegisterRoutes()
+	var routersList []domain.Router
+	routersList = append(routersList, route.NewSwitchRoute(router, switchController))
+	for _, router := range routersList {
+		router.RegisterRoutes()
+	}
 
 	router.Logger.Fatal(router.Start(viper.GetString("app.port")))
 }

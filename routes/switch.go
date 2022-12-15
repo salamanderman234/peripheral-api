@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/labstack/echo/v4"
+	"github.com/salamanderman234/peripheral-api/config"
 	"github.com/salamanderman234/peripheral-api/domain"
 )
 
@@ -13,11 +14,11 @@ type switchRoute struct {
 	baseUrl string
 }
 
-func NewSwitchRoute(router *echo.Echo, con domain.SwitchController) domain.SwitchRouter {
+func NewSwitchRoute(router *echo.Echo, con domain.SwitchController) domain.Router {
 	return &switchRoute{
 		router:  router,
 		con:     con,
-		baseUrl: "/api/v1/switch",
+		baseUrl: config.CreateAppPath("/switchs"),
 	}
 }
 
@@ -27,4 +28,5 @@ func (s *switchRoute) CreateNewURL(str string) string {
 
 func (s *switchRoute) RegisterRoutes() {
 	s.router.GET(s.CreateNewURL(""), s.con.GetAllSwitch)
+	// s.router.POST(s.CreateNewURL(""))
 }
