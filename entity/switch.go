@@ -1,7 +1,7 @@
 package entity
 
 type Switch struct {
-	Slug            string   `json:"slug,omitempty"`
+	Slug            string   `json:"slug"`
 	Name            string   `json:"name,omitempty" query:"name"`
 	Manufacturer    string   `json:"manufacturer,omitempty" query:"manufacturer"`
 	Type            string   `json:"type,omitempty" query:"type"`

@@ -18,7 +18,7 @@ func NewSwitchRoute(router *echo.Echo, con domain.SwitchController) domain.Route
 	return &switchRoute{
 		router:  router,
 		con:     con,
-		baseUrl: config.CreateAppPath("/switchs"),
+		baseUrl: config.CreateAppPath("/switches"),
 	}
 }
 

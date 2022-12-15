@@ -2,7 +2,6 @@ package policy
 
 import (
 	"context"
-	"encoding/json"
 	"strings"
 
 	"github.com/salamanderman234/peripheral-api/domain"
@@ -16,7 +15,6 @@ type SwitchPolicy struct {
 	TypeMessage         string        `json:"type,omitempty"`
 }
 
-// pindahkan policy nya ke controller sahaja
 func DocumentSwitchPolicy(ctx context.Context, switcEntity entity.Switch, service domain.SwitchService, op string) *SwitchPolicy {
 	var policy SwitchPolicy
 	policy.Data = switcEntity
@@ -25,14 +23,15 @@ func DocumentSwitchPolicy(ctx context.Context, switcEntity entity.Switch, servic
 		policy.NameMessage = "Name is required"
 	} else {
 		// checking if name already exists
-		var dummyArray []entity.Switch
-		filterEntity := entity.Switch{
-			Slug: strings.Join(strings.Split(strings.ToLower(switcEntity.Name), " "), "-"),
-		}
-		result, _ := service.GetSwitch(ctx, filterEntity)
-		json.Unmarshal(result, &dummyArray)
-		if len(dummyArray) != 0 {
-			policy.NameMessage = "This name is already exists"
+		if switcEntity.Name != "" {
+			var dummyArray []entity.Switch
+			filterEntity := entity.Switch{
+				Slug: strings.Join(strings.Split(strings.ToLower(switcEntity.Name), " "), "-"),
+			}
+			dummyArray, _ = service.GetSwitch(ctx, filterEntity)
+			if len(dummyArray) != 0 {
+				policy.NameMessage = "This name is already exists"
+			}
 		}
 	}
 
@@ -45,11 +44,13 @@ func DocumentSwitchPolicy(ctx context.Context, switcEntity entity.Switch, servic
 		policy.TypeMessage = "Type is required"
 	} else {
 		// checking if type correct
-		policy.TypeMessage = "Type must be either linear, clicky or silent"
-		for _, tipe := range []string{"linear", "clicky", "silent"} {
-			if switcEntity.Type == tipe {
-				policy.TypeMessage = ""
-				break
+		if switcEntity.Type != "" {
+			policy.TypeMessage = "Type must be either linear, clicky or silent"
+			for _, tipe := range []string{"linear", "clicky", "silent"} {
+				if switcEntity.Type == tipe {
+					policy.TypeMessage = ""
+					break
+				}
 			}
 		}
 	}

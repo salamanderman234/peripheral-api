@@ -11,39 +11,44 @@ import (
 )
 
 type switchService struct {
-	switchRepo domain.SwitchRepository
+	repository domain.SwitchRepository
 }
 
 func NewSwitchService(repo domain.SwitchRepository) domain.SwitchService {
 	return &switchService{
-		switchRepo: repo,
+		repository: repo,
 	}
 }
 
-func (s *switchService) GetSwitch(ctx context.Context, filter entity.Switch) ([]byte, error) {
-	switchs, err := s.switchRepo.FindAllSwitchWithFilter(ctx, filter.Type, filter.Manufacturer, filter.ActuationForce, filter.Slug)
+func (s *switchService) GetSwitch(ctx context.Context, filter entity.Switch) ([]entity.Switch, error) {
+	// converting entity to model
+	var filterModel model.Switch
+	temp, _ := json.Marshal(filter)
+	json.Unmarshal(temp, &filterModel)
+	// calling repo
+	switches, err := s.repository.FindAllSwitchWithFilter(ctx, filterModel)
 	if err != nil {
 		return nil, err
 	}
-
-	switchsParshed, _ := json.Marshal(switchs)
-	return switchsParshed, nil
+	// parsing result into json format so controller can convert it back into entity
+	var entitiesSwitches []entity.Switch
+	temp, _ = json.Marshal(switches)
+	json.Unmarshal(temp, &entitiesSwitches)
+	return entitiesSwitches, nil
 }
 
-func (s *switchService) CreateSwitch(ctx context.Context, switchs []entity.Switch) ([]interface{}, error) {
-	var switchsModel []model.Switch
-
-	// checking policy
-	for i := 0; i < len(switchs); i++ {
-		switchs[i].Slug = strings.Join(strings.Split(strings.ToLower(switchs[i].Name), " "), "-")
+func (s *switchService) CreateSwitch(ctx context.Context, switches []entity.Switch) ([]interface{}, error) {
+	// init
+	var switchesModel []model.Switch
+	// making slug for every switch
+	for i := 0; i < len(switches); i++ {
+		switches[i].Slug = strings.Join(strings.Split(strings.ToLower(switches[i].Name), " "), "-")
 	}
-
 	// convert entity to model
-	jsonSwitchs, _ := json.Marshal(switchs)
-	json.Unmarshal(jsonSwitchs, &switchsModel)
-
+	temp, _ := json.Marshal(switches)
+	json.Unmarshal(temp, &switchesModel)
 	// calling repo
-	insertedId, err := s.switchRepo.BatchInsertSwitchs(ctx, switchsModel)
+	insertedId, err := s.repository.BatchInsertSwitches(ctx, switchesModel)
 	if err != nil {
 		return nil, err
 	}
@@ -52,13 +57,13 @@ func (s *switchService) CreateSwitch(ctx context.Context, switchs []entity.Switc
 }
 
 func (s *switchService) CreateOneSwitch(ctx context.Context, switchEntity entity.Switch) error {
+	// init
 	var switchModel model.Switch
 	// convert entity to model
-	jsonSwitchs, _ := json.Marshal(switchEntity)
-	json.Unmarshal(jsonSwitchs, &switchModel)
-
+	temp, _ := json.Marshal(switchEntity)
+	json.Unmarshal(temp, &switchModel)
 	// calling repo
-	err := s.switchRepo.InsertSwitch(ctx, switchModel)
+	err := s.repository.InsertSwitch(ctx, switchModel)
 	if err != nil {
 		return err
 	}
@@ -66,9 +71,9 @@ func (s *switchService) CreateOneSwitch(ctx context.Context, switchEntity entity
 }
 
 func (s *switchService) UpdateSwitch(ctx context.Context, updateField entity.Switch, filter entity.Switch) (int64, error) {
+	// init
 	var updateFieldModel model.Switch
 	var filterModel model.Switch
-
 	// creating new slug if there any new name
 	if updateField.Name != "" {
 		updateField.Slug = strings.Join(strings.Split(strings.ToLower(updateField.Name), " "), "-")
@@ -80,9 +85,9 @@ func (s *switchService) UpdateSwitch(ctx context.Context, updateField entity.Swi
 	json.Unmarshal(temp, &filterModel)
 
 	// calling repo
-	modifiedDocument, err := s.switchRepo.UpdateSwitch(ctx, updateFieldModel, filterModel)
+	modifiedDocuments, err := s.repository.UpdateSwitch(ctx, updateFieldModel, filterModel)
 	if err != nil {
 		return 0, err
 	}
-	return modifiedDocument, nil
+	return modifiedDocuments, nil
 }

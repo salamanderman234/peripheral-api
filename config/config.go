@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	SwitchsCollection  = "switchs"
+	SwitchesCollection = "switches"
 	KeyboardCollection = "keyboards"
 	MouseCollection    = "mouses"
 )
