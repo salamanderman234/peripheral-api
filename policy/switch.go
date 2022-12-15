@@ -11,22 +11,29 @@ type SwitchPolicy struct {
 
 func InsertSwitchPolicy(switcEntity entity.Switch) *SwitchPolicy {
 	var policy SwitchPolicy
-	var isReturn bool
 	policy.Data = switcEntity
+	// name policy
 	if switcEntity.Name == "" {
 		policy.NameMessage = "Name is required"
-		isReturn = true
 	}
+	// manufacturer policy
 	if switcEntity.Manufacturer == "" {
-		policy.NameMessage = "Manufacturer is required"
-		isReturn = true
+		policy.ManufacturerMessage = "Manufacturer is required"
 	}
+	// type policy
 	if switcEntity.Type == "" {
-		policy.NameMessage = "Type is required"
-		isReturn = true
+		policy.TypeMessage = "Type is required"
+	} else {
+		policy.TypeMessage = "Type must be either linear, clicky or silent"
+		for _, tipe := range []string{"linear", "clicky", "silent"} {
+			if switcEntity.Type == tipe {
+				policy.TypeMessage = ""
+				break
+			}
+		}
 	}
 
-	if isReturn {
+	if policy.NameMessage != "" || policy.ManufacturerMessage != "" || policy.TypeMessage != "" {
 		return &policy
 	}
 	return nil
