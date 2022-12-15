@@ -1,0 +1,17 @@
+{
+	"database": {
+		"driver": "mongodb",
+		"host": "your database host name",
+		"port": "your database port",
+		"username": "your database username",
+		"password": "your database password",
+		"name": "database name"
+	},
+	"redis": {},
+	"app": {
+		"url": "/api",
+		"version": "1",
+		"port": "your application port",
+		"name": "periapi"
+	}
+}
