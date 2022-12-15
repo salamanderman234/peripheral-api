@@ -10,7 +10,6 @@ import (
 )
 
 func Error(err error, ctx echo.Context) {
-	var errorMessage string
 	report, ok := err.(*echo.HTTPError)
 
 	if ok {
@@ -19,16 +18,9 @@ func Error(err error, ctx echo.Context) {
 		report = echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	if report.Code == 404 {
-		errorMessage = "The resource you are trying to reach cannot be found on this server"
-	} else {
-		errorMessage = "Something went wrong"
-	}
-
 	utility.NewLogEntry(ctx).Error(fmt.Sprintf("%d - %s", report.Code, report.Message))
 	ctx.JSON(report.Code, entity.BaseResponse{
 		Code:   report.Code,
 		Status: report.Message.(string),
-		Errors: errorMessage,
 	})
 }

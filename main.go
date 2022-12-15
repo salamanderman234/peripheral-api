@@ -38,7 +38,7 @@ func main() {
 	}
 	// dependency injection
 	switchRepository := repository.NewSwitchRepository(client)
-	switchService := service.NewSwitchRepository(switchRepository)
+	switchService := service.NewSwitchService(switchRepository)
 	switchController := controller.NewSwitchController(switchService)
 
 	// router configuration

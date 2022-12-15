@@ -13,7 +13,7 @@ type switchService struct {
 	switchRepo domain.SwitchRepository
 }
 
-func NewSwitchRepository(repo domain.SwitchRepository) domain.SwitchService {
+func NewSwitchService(repo domain.SwitchRepository) domain.SwitchService {
 	return &switchService{
 		switchRepo: repo,
 	}
@@ -37,10 +37,24 @@ func (s *switchService) CreateSwitch(ctx context.Context, switchs []entity.Switc
 	json.Unmarshal(jsonSwitchs, &switchsModel)
 
 	// calling repo
-	_, err := s.switchRepo.BatchInsertSwitchs(ctx, switchsModel)
+	err := s.switchRepo.BatchInsertSwitchs(ctx, switchsModel)
 	if err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func (s *switchService) CreateOneSwitch(ctx context.Context, switchEntity entity.Switch) error {
+	var switchModel model.Switch
+	// convert entity to model
+	jsonSwitchs, _ := json.Marshal(switchEntity)
+	json.Unmarshal(jsonSwitchs, &switchModel)
+
+	// calling repo
+	err := s.switchRepo.InsertSwitch(ctx, switchModel)
+	if err != nil {
+		return err
+	}
 	return nil
 }

@@ -33,8 +33,9 @@ func (s *switchController) GetAllSwitch(ctx echo.Context) error {
 	result, err := s.service.GetSwitch(ctx.Request().Context(), switchFilter)
 	if err != nil {
 		utility.NewLogEntry(ctx).Error(err)
-		response.Status = "internal server error"
+		response.Status = "Internal Server Error"
 		response.Code = http.StatusInternalServerError
+		response.Errors = "Something Went Wrong"
 	} else {
 		// convert result to array of entitiy.switch
 		json.Unmarshal(result, &switchs)
@@ -61,13 +62,29 @@ func (s *switchController) CreateNewSwitch(ctx echo.Context) error {
 	var response entity.BaseResponse
 
 	// binding
-	if err := ctx.Bind(switchsBody); err != nil {
+	if err := ctx.Bind(&switchsBody); err != nil {
 		utility.NewLogEntry(ctx).Error("400 - Bad Request")
 		response.Status = "Bad Request"
 		response.Code = http.StatusBadRequest
 		response.Errors = "Data body does not match specifications"
+
 	} else {
 
+		// calling service
+		err := s.service.CreateSwitch(ctx.Request().Context(), switchsBody)
+		// error while parsing body
+		if err != nil {
+			utility.NewLogEntry(ctx).Error("500 - Internal Server Error")
+			response.Status = "internal Server Error"
+			response.Code = http.StatusBadRequest
+			response.Errors = "Something Went Wrong"
+		} else {
+			utility.NewLogEntry(ctx).Info("201 - Created")
+			response.Status = "Created"
+			response.Code = http.StatusCreated
+		}
+
 	}
+	// return response
 	return ctx.JSON(response.Code, response)
 }

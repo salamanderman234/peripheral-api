@@ -9,8 +9,8 @@ import (
 )
 
 type SwitchRepository interface {
-	InsertSwitch(ctx context.Context, newSwitch model.Switch) (model.Switch, error)
-	BatchInsertSwitchs(ctx context.Context, switchs []model.Switch) ([]model.Switch, error)
+	InsertSwitch(ctx context.Context, newSwitch model.Switch) error
+	BatchInsertSwitchs(ctx context.Context, switchs []model.Switch) error
 	UpdateSwitch(ctx context.Context, updateField model.Switch, condition model.Switch) error
 	DeleteSwitch(ctx context.Context, condition model.Switch) error
 	FindAllSwitchWithFilter(ctx context.Context, switchType string, switchManufacturer string, acforce float64) ([]model.Switch, error)
@@ -19,6 +19,7 @@ type SwitchRepository interface {
 type SwitchService interface {
 	GetSwitch(ctx context.Context, filter entity.Switch) ([]byte, error)
 	CreateSwitch(ctx context.Context, switchs []entity.Switch) error
+	CreateOneSwitch(ctx context.Context, switchEntity entity.Switch) error
 }
 
 type SwitchController interface {

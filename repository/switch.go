@@ -13,21 +13,38 @@ import (
 )
 
 type switchRepository struct {
-	client *mongo.Client
+	client     *mongo.Client
+	collection *mongo.Collection
 }
 
 func NewSwitchRepository(connection *mongo.Client) domain.SwitchRepository {
+	collection := connection.Database(config.GetDatabaseName()).Collection(config.SwitchsCollection)
 	return &switchRepository{
-		client: connection,
+		client:     connection,
+		collection: collection,
 	}
 }
 
-func (s *switchRepository) InsertSwitch(ctx context.Context, newSwitch model.Switch) (model.Switch, error) {
-	return model.Switch{}, nil
+func (s *switchRepository) InsertSwitch(ctx context.Context, newSwitch model.Switch) error {
+	_, err := s.collection.InsertOne(ctx, newSwitch)
+	if err != nil {
+		utility.NewLogEntry(nil).Error("Failed to insert data to switch collection in switch repository")
+		return err
+	}
+	return nil
 }
 
-func (s *switchRepository) BatchInsertSwitchs(ctx context.Context, switchs []model.Switch) ([]model.Switch, error) {
-	return []model.Switch{}, nil
+func (s *switchRepository) BatchInsertSwitchs(ctx context.Context, switchs []model.Switch) error {
+	var switchsInterface []interface{}
+	for _, element := range switchs {
+		switchsInterface = append(switchsInterface, element)
+	}
+	_, err := s.collection.InsertMany(ctx, switchsInterface)
+	if err != nil {
+		utility.NewLogEntry(nil).Error("Failed to insert data to switch collection in switch repository")
+		return err
+	}
+	return nil
 }
 
 func (s *switchRepository) UpdateSwitch(ctx context.Context, updateField model.Switch, condition model.Switch) error {
@@ -43,7 +60,6 @@ func (s *switchRepository) FindAllSwitchWithFilter(ctx context.Context, switchTy
 	var switchs []model.Switch
 
 	// making filter
-	collection := s.client.Database(config.GetDatabaseName()).Collection(config.SwitchsCollection)
 	filter := bson.D{}
 	if switchType != "" {
 		filter = append(filter, primitive.E{Key: "type", Value: switchType})
@@ -52,13 +68,13 @@ func (s *switchRepository) FindAllSwitchWithFilter(ctx context.Context, switchTy
 		filter = append(filter, primitive.E{Key: "manufacturer", Value: switchManufacturer})
 	}
 	if acforce != 0.0 {
-		filter = append(filter, primitive.E{Key: "actuation_force(g)", Value: bson.D{
+		filter = append(filter, primitive.E{Key: "actuation_force", Value: bson.D{
 			primitive.E{Key: "$lte", Value: acforce},
 		}})
 	}
 
 	// query
-	cur, err := collection.Find(ctx, filter, nil)
+	cur, err := s.collection.Find(ctx, filter, nil)
 	if err != nil {
 		utility.NewLogEntry(nil).Error("Failed to get data from switch collection in switch repository")
 		return switchs, err

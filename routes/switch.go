@@ -28,5 +28,5 @@ func (s *switchRoute) CreateNewURL(str string) string {
 
 func (s *switchRoute) RegisterRoutes() {
 	s.router.GET(s.CreateNewURL(""), s.con.GetAllSwitch)
-	// s.router.POST(s.CreateNewURL(""))
+	s.router.POST(s.CreateNewURL(""), s.con.CreateNewSwitch)
 }
