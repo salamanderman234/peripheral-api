@@ -52,15 +52,14 @@ func (s *switchController) GetOneSwitch(ctx echo.Context) error {
 
 func (s *switchController) GetAllSwitch(ctx echo.Context) error {
 	// init
-	var switchFilter entity.Switch
-	var switchs []entity.Switch
-	var response entity.BaseResponse
+	var filter entity.Switch
+	var foundSwitches []entity.Switch
 
 	// get filter from query, body or path params
-	ctx.Bind(&switchFilter)
+	ctx.Bind(&filter)
 
 	// calling service
-	result, err := s.service.GetSwitch(ctx.Request().Context(), switchFilter)
+	result, err := s.service.GetSwitch(ctx.Request().Context(), filter)
 	if err != nil {
 		go utility.NewLogEntry(ctx).Error("500 - Internal Server Error")
 		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
@@ -70,9 +69,10 @@ func (s *switchController) GetAllSwitch(ctx echo.Context) error {
 		})
 	}
 	// convert result to array of entitiy.switch
-	json.Unmarshal(result, &switchs)
+	json.Unmarshal(result, &foundSwitches)
 
-	if len(switchs) == 0 {
+	// check if result is empty
+	if len(foundSwitches) == 0 {
 		go utility.NewLogEntry(ctx).Error("404 - Not Found")
 		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
 			Status: "Not Found",
@@ -83,17 +83,17 @@ func (s *switchController) GetAllSwitch(ctx echo.Context) error {
 
 	// sending response
 	go utility.NewLogEntry(ctx).Info("200 - ok")
-	return ctx.JSON(response.Code, entity.BaseResponse{
+	return ctx.JSON(http.StatusOK, entity.BaseResponse{
 		Status: "Ok",
 		Code:   http.StatusOK,
-		Data:   switchs,
+		Data:   foundSwitches,
 	})
 }
 
 func (s *switchController) CreateNewSwitch(ctx echo.Context) error {
 	// init
 	var body []entity.Switch
-	var policyResult []*policy.SwitchPolicy
+	var policyResults []*policy.SwitchPolicy
 
 	// binding
 	if err := ctx.Bind(&body); err != nil {
@@ -106,17 +106,17 @@ func (s *switchController) CreateNewSwitch(ctx echo.Context) error {
 	}
 	// checking input policy
 	for _, element := range body {
-		result := policy.DocumentSwitchPolicy(ctx.Request().Context(), element, s.service)
+		result := policy.DocumentSwitchPolicy(ctx.Request().Context(), element, s.service, "insert")
 		if result != nil {
-			policyResult = append(policyResult, result)
+			policyResults = append(policyResults, result)
 		}
 	}
-	if len(policyResult) != 0 {
+	if len(policyResults) != 0 {
 		go utility.NewLogEntry(ctx).Error("400 - Bad Request")
 		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
 			Status: "Bad Request",
 			Code:   http.StatusBadRequest,
-			Errors: policyResult,
+			Errors: policyResults,
 		})
 	}
 
@@ -125,7 +125,7 @@ func (s *switchController) CreateNewSwitch(ctx echo.Context) error {
 	// error while parsing body
 	if err != nil {
 		go utility.NewLogEntry(ctx).Error("500 - Internal Server Error")
-		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
+		return ctx.JSON(http.StatusInternalServerError, entity.BaseResponse{
 			Status: "Internal Server Error",
 			Code:   http.StatusInternalServerError,
 			Errors: "Something Went Wrong",
@@ -143,11 +143,11 @@ func (s *switchController) CreateNewSwitch(ctx echo.Context) error {
 
 func (s *switchController) UpdateOneSwitch(ctx echo.Context) error {
 	// init
-	var updateField entity.Switch
+	var body entity.Switch
 	var filter entity.Switch
 
 	// get updatefield from body
-	err := ctx.Bind(&updateField)
+	err := ctx.Bind(&body)
 	if err != nil {
 		go utility.NewLogEntry(ctx).Error("400 - Bad Request")
 		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
@@ -156,10 +156,19 @@ func (s *switchController) UpdateOneSwitch(ctx echo.Context) error {
 			Errors: "Data body does not match specifications",
 		})
 	}
-	// var foundSwitch []entity.Switch
-	filter.Slug = ctx.Param("slug")
+	// checking policy
+	policyCheckResult := policy.DocumentSwitchPolicy(ctx.Request().Context(), body, s.service, "update")
+	if policyCheckResult != nil {
+		go utility.NewLogEntry(ctx).Error("400 - Bad Request")
+		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
+			Status: "Bad Request",
+			Code:   http.StatusBadRequest,
+			Errors: policyCheckResult,
+		})
+	}
 	// calling service
-	modifiedDocument, err := s.service.UpdateSwitch(ctx.Request().Context(), updateField, filter)
+	filter.Slug = ctx.Param("slug")
+	modifiedDocument, err := s.service.UpdateSwitch(ctx.Request().Context(), body, filter)
 	if err != nil {
 		go utility.NewLogEntry(ctx).Error("500 - Internal Server Error")
 		return ctx.JSON(http.StatusInternalServerError, entity.BaseResponse{
@@ -168,7 +177,7 @@ func (s *switchController) UpdateOneSwitch(ctx echo.Context) error {
 			Errors: "Something went wrong",
 		})
 	}
-
+	// checking if any document are updated
 	if modifiedDocument == 0 {
 		go utility.NewLogEntry(ctx).Error("404 - Not Found")
 		return ctx.JSON(http.StatusNotFound, entity.BaseResponse{
@@ -177,7 +186,7 @@ func (s *switchController) UpdateOneSwitch(ctx echo.Context) error {
 			Errors: "No data found with that parameter",
 		})
 	}
-
+	// sending response
 	go utility.NewLogEntry(ctx).Info("200 - Ok")
 	return ctx.JSON(http.StatusOK, entity.BaseResponse{
 		Status: "Ok",

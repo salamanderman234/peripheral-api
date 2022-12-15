@@ -17,11 +17,11 @@ type SwitchPolicy struct {
 }
 
 // pindahkan policy nya ke controller sahaja
-func DocumentSwitchPolicy(ctx context.Context, switcEntity entity.Switch, service domain.SwitchService) *SwitchPolicy {
+func DocumentSwitchPolicy(ctx context.Context, switcEntity entity.Switch, service domain.SwitchService, op string) *SwitchPolicy {
 	var policy SwitchPolicy
 	policy.Data = switcEntity
 	// name policy
-	if switcEntity.Name == "" {
+	if switcEntity.Name == "" && op == "insert" {
 		policy.NameMessage = "Name is required"
 	} else {
 		// checking if name already exists
@@ -37,11 +37,11 @@ func DocumentSwitchPolicy(ctx context.Context, switcEntity entity.Switch, servic
 	}
 
 	// manufacturer policy
-	if switcEntity.Manufacturer == "" {
+	if switcEntity.Manufacturer == "" && op == "insert" {
 		policy.ManufacturerMessage = "Manufacturer is required"
 	}
 	// type policy
-	if switcEntity.Type == "" {
+	if switcEntity.Type == "" && op == "insert" {
 		policy.TypeMessage = "Type is required"
 	} else {
 		// checking if type correct
