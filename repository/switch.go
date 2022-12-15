@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/salamanderman234/peripheral-api/config"
 	"github.com/salamanderman234/peripheral-api/domain"
@@ -37,6 +38,9 @@ func (s *switchRepository) InsertSwitch(ctx context.Context, newSwitch model.Swi
 func (s *switchRepository) BatchInsertSwitchs(ctx context.Context, switchs []model.Switch) error {
 	var switchsInterface []interface{}
 	for _, element := range switchs {
+		now := time.Now().Format(time.RFC1123)
+		element.CreatedAt = now
+		element.UpdateAt = now
 		switchsInterface = append(switchsInterface, element)
 	}
 	_, err := s.collection.InsertMany(ctx, switchsInterface)
@@ -47,7 +51,8 @@ func (s *switchRepository) BatchInsertSwitchs(ctx context.Context, switchs []mod
 	return nil
 }
 
-func (s *switchRepository) UpdateSwitch(ctx context.Context, updateField model.Switch, condition model.Switch) error {
+func (s *switchRepository) UpdateSwitch(ctx context.Context, updateField model.Switch, filter model.Switch) error {
+
 	return nil
 }
 
@@ -79,13 +84,13 @@ func (s *switchRepository) FindAllSwitchWithFilter(ctx context.Context, switchTy
 	// query
 	cur, err := s.collection.Find(ctx, filter, nil)
 	if err != nil {
-		utility.NewLogEntry(nil).Error("Failed to get data from switch collection in switch repository")
+		utility.NewLogEntry(nil).Error(err)
 		return switchs, err
 	}
 
 	// to result
 	if err = cur.All(ctx, &switchs); err != nil {
-		utility.NewLogEntry(nil).Error("Failed to decode data from cursor collections in switch repository")
+		utility.NewLogEntry(nil).Error(err)
 		return switchs, err
 	}
 

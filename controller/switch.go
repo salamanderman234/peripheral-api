@@ -130,3 +130,14 @@ func (s *switchController) CreateNewSwitch(ctx echo.Context) error {
 		Code:   http.StatusOK,
 	})
 }
+
+func (s *switchController) UpdateOneSwitch(ctx echo.Context) error {
+	// init
+	var filter entity.Switch
+	// var foundSwitch []entity.Switch
+	filter.Slug = ctx.Param("slug")
+	// calling service
+
+	// decode
+	return nil
+}

@@ -76,3 +76,7 @@ func (s *switchService) CreateOneSwitch(ctx context.Context, switchEntity entity
 	}
 	return nil
 }
+
+func (s *switchService) UpdateSwitch(ctx context.Context, updateField entity.Switch, filter entity.Switch) ([]byte, error) {
+	return nil, nil
+}
