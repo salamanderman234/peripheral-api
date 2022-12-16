@@ -15,8 +15,8 @@ type Switch struct {
 	ActuationLength float64        `json:"actuation_length,omitempty" bson:"actuation_length,omitempty"`
 	TravelLength    float64        `json:"travel_length,omitempty" bson:"travel_length,omitempty"`
 	Picture         string         `json:"picture,omitempty" bson:"picture,omitempty"`
-	CreatedAt       string         `json:"-" bson:"created_at"`
-	UpdateAt        string         `json:"-" bson:"update_at"`
+	CreatedAt       string         `json:"created_at,omitempty" bson:"created_at,omitempty"`
+	UpdateAt        string         `json:"updated_at,omitempty" bson:"update_at,omitempty"`
 }
 
 type HousingSwitch struct {

@@ -1,35 +1,30 @@
 package route
 
 import (
-	"fmt"
-
 	"github.com/labstack/echo/v4"
-	"github.com/salamanderman234/peripheral-api/config"
 	"github.com/salamanderman234/peripheral-api/domain"
 )
 
 type switchRoute struct {
-	router  *echo.Echo
-	con     domain.SwitchController
-	baseUrl string
+	group *echo.Group
+	con   domain.SwitchController
+	path  string
 }
 
-func NewSwitchRoute(router *echo.Echo, con domain.SwitchController) domain.Router {
+func NewSwitchRoute(group *echo.Group, con domain.SwitchController) domain.Router {
 	return &switchRoute{
-		router:  router,
-		con:     con,
-		baseUrl: config.CreateAppPath("/switches"),
+		group: group,
+		con:   con,
+		path:  "/switches",
 	}
 }
 
-func (s *switchRoute) CreateNewURL(str string) string {
-	return fmt.Sprintf("%s%s", s.baseUrl, str)
-}
-
 func (s *switchRoute) RegisterRoutes() {
-	s.router.GET(s.CreateNewURL(""), s.con.GetAllSwitch)
-	s.router.GET(s.CreateNewURL("/:switch_id"), s.con.GetOneSwitch)
-	s.router.POST(s.CreateNewURL(""), s.con.CreateNewSwitch)
-	s.router.PATCH(s.CreateNewURL("/:switch_id"), s.con.UpdateOneSwitch)
-	s.router.DELETE(s.CreateNewURL("/:switch_id"), s.con.DropSwitch)
+	// api/v1/switches
+	group := s.group.Group(s.path)
+	group.GET("", s.con.GetAllSwitch)
+	group.GET("/:switch_id", s.con.GetOneSwitch)
+	group.POST("", s.con.CreateNewSwitch)
+	group.PATCH("/:switch_id", s.con.UpdateOneSwitch)
+	group.DELETE("/:switch_id", s.con.DropSwitch)
 }

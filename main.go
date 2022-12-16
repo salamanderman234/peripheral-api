@@ -48,7 +48,9 @@ func main() {
 
 	// router handler
 	var routersList []domain.Router
-	routersList = append(routersList, route.NewSwitchRoute(router, switchController))
+	// /api/v1/
+	group := router.Group(config.CreateAppPath(""))
+	routersList = append(routersList, route.NewSwitchRoute(group, switchController))
 	for _, router := range routersList {
 		router.RegisterRoutes()
 	}

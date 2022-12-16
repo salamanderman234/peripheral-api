@@ -30,7 +30,9 @@ func DocumentSwitchPolicy(ctx context.Context, switcEntity entity.Switch, servic
 			}
 			dummyArray, _ = service.GetSwitch(ctx, filterEntity, "")
 			if len(dummyArray) != 0 {
-				policy.NameMessage = "This name is already exists"
+				if dummyArray[0].Name != switcEntity.Name || len(dummyArray) > 1 {
+					policy.NameMessage = "This name is already exists"
+				}
 			}
 		}
 	}
