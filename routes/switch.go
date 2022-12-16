@@ -28,8 +28,8 @@ func (s *switchRoute) CreateNewURL(str string) string {
 
 func (s *switchRoute) RegisterRoutes() {
 	s.router.GET(s.CreateNewURL(""), s.con.GetAllSwitch)
-	s.router.GET(s.CreateNewURL("/:slug"), s.con.GetOneSwitch)
+	s.router.GET(s.CreateNewURL("/:switch_id"), s.con.GetOneSwitch)
 	s.router.POST(s.CreateNewURL(""), s.con.CreateNewSwitch)
-	s.router.PATCH(s.CreateNewURL("/:slug"), s.con.UpdateOneSwitch)
-	s.router.DELETE(s.CreateNewURL("/:slug"), s.con.DropSwitch)
+	s.router.PATCH(s.CreateNewURL("/:switch_id"), s.con.UpdateOneSwitch)
+	s.router.DELETE(s.CreateNewURL("/:switch_id"), s.con.DropSwitch)
 }

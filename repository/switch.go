@@ -42,6 +42,7 @@ func (s *switchRepository) BatchInsertSwitches(ctx context.Context, switches []m
 	for _, element := range switches {
 		now := time.Now().Format(time.RFC1123)
 		element.UpdateAt = now
+		element.CreatedAt = now
 		switchesInterface = append(switchesInterface, element)
 	}
 	// query
@@ -92,8 +93,8 @@ func (s *switchRepository) FindAllSwitchWithFilter(ctx context.Context, filter m
 
 	// making filter
 	filterBson := bson.M{}
-	if filter.Slug != "" {
-		filterBson["slug"] = filter.Slug
+	if filter.SwitchID != "" {
+		filterBson["switch_id"] = filter.SwitchID
 	}
 	if filter.Type != "" {
 		filterBson["type"] = filter.Type
@@ -104,9 +105,14 @@ func (s *switchRepository) FindAllSwitchWithFilter(ctx context.Context, filter m
 	if filter.ActuationForce != 0.0 {
 		filterBson["actuation_force"] = filter.ActuationForce
 	}
+
 	// makin sorting field
+	defaultSort := "manufacturer"
+	if sort != "" {
+		defaultSort = sort
+	}
 	sortBson := bson.D{
-		{Key: sort, Value: 1},
+		{Key: defaultSort, Value: 1},
 		{Key: "name", Value: 1},
 		{Key: "updateat", Value: -1},
 	}

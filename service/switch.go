@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/salamanderman234/peripheral-api/domain"
@@ -26,8 +27,8 @@ func (s *switchService) GetSwitch(ctx context.Context, filter entity.Switch, sor
 	var filterModel model.Switch
 	temp, _ := json.Marshal(filter)
 	json.Unmarshal(temp, &filterModel)
-	if filter.Slug != "" {
-		filterModel.Slug = filter.Slug
+	if filter.SwitchID != "" {
+		filterModel.SwitchID = filter.SwitchID
 	}
 	// calling repo
 	switches, err := s.repository.FindAllSwitchWithFilter(ctx, filterModel, sort)
@@ -49,7 +50,7 @@ func (s *switchService) CreateSwitch(ctx context.Context, switches []entity.Swit
 	json.Unmarshal(temp, &switchesModel)
 	// making slug for every switch
 	for i := 0; i < len(switches); i++ {
-		switchesModel[i].Slug = strings.Join(strings.Split(strings.ToLower(switches[i].Name), " "), "-")
+		switchesModel[i].SwitchID = strings.Join(strings.Split(strings.ToLower(switches[i].Name), " "), "-")
 	}
 	// calling repo
 	insertedId, err := s.repository.BatchInsertSwitches(ctx, switchesModel)
@@ -78,13 +79,13 @@ func (s *switchService) UpdateSwitch(ctx context.Context, updateField entity.Swi
 	// init
 	var updateFieldModel model.Switch
 	var filterModel primitive.M
+	// making sure slug is empty
+	if updateField.SwitchID != "" {
+		updateField.SwitchID = ""
+	}
 	// creating new slug if there any new name
 	if updateField.Name != "" {
-		updateField.Slug = strings.Join(strings.Split(strings.ToLower(updateField.Name), " "), "-")
-	}
-	// making sure slug is empty
-	if updateField.Slug != "" {
-		updateField.Slug = ""
+		updateField.SwitchID = strings.Join(strings.Split(strings.ToLower(updateField.Name), " "), "-")
 	}
 	// convert to model
 	temp, _ := json.Marshal(updateField)
@@ -92,9 +93,7 @@ func (s *switchService) UpdateSwitch(ctx context.Context, updateField entity.Swi
 	// karena json encode di etity diset tidask ada maka harus dilakukan secara manual
 	temp, _ = json.Marshal(filter)
 	json.Unmarshal(temp, &filterModel)
-	if filter.Slug != "" {
-		filterModel["slug"] = filter.Slug
-	}
+	fmt.Println(filterModel)
 	// calling repo
 	modifiedDocuments, err := s.repository.UpdateSwitch(ctx, updateFieldModel, filterModel)
 	if err != nil {

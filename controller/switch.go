@@ -24,7 +24,7 @@ func NewSwitchController(service domain.SwitchService) domain.SwitchController {
 func (s *switchController) GetOneSwitch(ctx echo.Context) error {
 	var filter entity.Switch
 	var foundSwitch []entity.Switch
-	filter.Slug = ctx.Param("slug")
+	filter.SwitchID = ctx.Param("switch_id")
 
 	// calling service
 	foundSwitch, err := s.service.GetSwitch(ctx.Request().Context(), filter, "")
@@ -151,7 +151,6 @@ func (s *switchController) UpdateOneSwitch(ctx echo.Context) error {
 
 	// get updatefield from body
 	err := ctx.Bind(&body)
-	fmt.Println(body)
 	if err != nil || ctx.Request().ContentLength == 0 {
 		go utility.NewLogEntry(ctx).Error("400 - Bad Request")
 		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
@@ -172,7 +171,7 @@ func (s *switchController) UpdateOneSwitch(ctx echo.Context) error {
 	}
 
 	// calling service
-	filter.Slug = ctx.Param("slug")
+	filter.SwitchID = ctx.Param("switch_id")
 	modifiedDocument, err := s.service.UpdateSwitch(ctx.Request().Context(), body, filter)
 	if err != nil {
 		go utility.NewLogEntry(ctx).Error("500 - Internal Server Error")
@@ -201,13 +200,13 @@ func (s *switchController) UpdateOneSwitch(ctx echo.Context) error {
 }
 
 func (s *switchController) DropSwitch(ctx echo.Context) error {
-	filter := ctx.Param("slug")
+	filter := ctx.Param("switch_id")
 	if filter == "" {
 		go utility.NewLogEntry(ctx).Error("400 - Bad Request")
 		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
 			Status: "Bad Request",
 			Code:   http.StatusBadRequest,
-			Errors: "Missing slug parameter",
+			Errors: "Missing switch id parameter",
 		})
 	}
 	deletedIDs, err := s.service.DeleteSwitch(ctx.Request().Context(), filter)

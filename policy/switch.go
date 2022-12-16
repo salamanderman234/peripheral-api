@@ -26,7 +26,7 @@ func DocumentSwitchPolicy(ctx context.Context, switcEntity entity.Switch, servic
 		if switcEntity.Name != "" {
 			var dummyArray []entity.Switch
 			filterEntity := entity.Switch{
-				Slug: strings.Join(strings.Split(strings.ToLower(switcEntity.Name), " "), "-"),
+				SwitchID: strings.Join(strings.Split(strings.ToLower(switcEntity.Name), " "), "-"),
 			}
 			dummyArray, _ = service.GetSwitch(ctx, filterEntity, "")
 			if len(dummyArray) != 0 {
