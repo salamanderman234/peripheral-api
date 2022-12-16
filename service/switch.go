@@ -44,13 +44,13 @@ func (s *switchService) GetSwitch(ctx context.Context, filter entity.Switch) ([]
 func (s *switchService) CreateSwitch(ctx context.Context, switches []entity.Switch) ([]interface{}, error) {
 	// init
 	var switchesModel []model.Switch
-	// making slug for every switch
-	for i := 0; i < len(switches); i++ {
-		switches[i].Slug = strings.Join(strings.Split(strings.ToLower(switches[i].Name), " "), "-")
-	}
 	// convert entity to model
 	temp, _ := json.Marshal(switches)
 	json.Unmarshal(temp, &switchesModel)
+	// making slug for every switch
+	for i := 0; i < len(switches); i++ {
+		switchesModel[i].Slug = strings.Join(strings.Split(strings.ToLower(switches[i].Name), " "), "-")
+	}
 	// calling repo
 	insertedId, err := s.repository.BatchInsertSwitches(ctx, switchesModel)
 	if err != nil {
@@ -74,7 +74,6 @@ func (s *switchService) CreateOneSwitch(ctx context.Context, switchEntity entity
 	return nil
 }
 
-// ganti filter menjadi map agar bisa diencode menjadi bson
 func (s *switchService) UpdateSwitch(ctx context.Context, updateField entity.Switch, filter entity.Switch) (int64, error) {
 	// init
 	var updateFieldModel model.Switch
@@ -102,4 +101,12 @@ func (s *switchService) UpdateSwitch(ctx context.Context, updateField entity.Swi
 		return 0, err
 	}
 	return modifiedDocuments, nil
+}
+
+func (s *switchService) DeleteSwitch(ctx context.Context, filter string) (int64, error) {
+	deletedCount, err := s.repository.DeleteSwitch(ctx, filter)
+	if err != nil {
+		return deletedCount, err
+	}
+	return deletedCount, nil
 }

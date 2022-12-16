@@ -76,8 +76,14 @@ func (s *switchRepository) UpdateSwitch(ctx context.Context, updateField model.S
 	return result.ModifiedCount, nil
 }
 
-func (s *switchRepository) DeleteSwitch(ctx context.Context, condition model.Switch) error {
-	return nil
+func (s *switchRepository) DeleteSwitch(ctx context.Context, condition string) (int64, error) {
+	filter := bson.M{"slug": condition}
+	result, err := s.collection.DeleteOne(ctx, filter)
+	if err != nil {
+		go utility.NewLogEntry(nil).Error(err)
+		return 0, err
+	}
+	return result.DeletedCount, nil
 }
 
 func (s *switchRepository) FindAllSwitchWithFilter(ctx context.Context, filter model.Switch) ([]model.Switch, error) {

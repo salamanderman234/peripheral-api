@@ -15,7 +15,7 @@ type switchController struct {
 	service domain.SwitchService
 }
 
-func NewSwitchController(service domain.SwitchService) *switchController {
+func NewSwitchController(service domain.SwitchService) domain.SwitchController {
 	return &switchController{
 		service: service,
 	}
@@ -197,5 +197,42 @@ func (s *switchController) UpdateOneSwitch(ctx echo.Context) error {
 		Status: "Ok",
 		Code:   http.StatusOK,
 		Data:   fmt.Sprintf("%d Document Modified Successfully", modifiedDocument),
+	})
+}
+
+func (s *switchController) DropSwitch(ctx echo.Context) error {
+	filter := ctx.Param("slug")
+	if filter == "" {
+		go utility.NewLogEntry(ctx).Error("400 - Bad Request")
+		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
+			Status: "Bad Request",
+			Code:   http.StatusBadRequest,
+			Errors: "Missing slug parameter",
+		})
+	}
+	deletedIDs, err := s.service.DeleteSwitch(ctx.Request().Context(), filter)
+	if err != nil {
+		go utility.NewLogEntry(ctx).Error("500 - Internal Server Error")
+		return ctx.JSON(http.StatusInternalServerError, entity.BaseResponse{
+			Status: "Internal Server Error",
+			Code:   http.StatusInternalServerError,
+			Errors: "Something went wrong",
+		})
+	}
+
+	if deletedIDs == 0 {
+		go utility.NewLogEntry(ctx).Error("404 - Not Found")
+		return ctx.JSON(http.StatusNotFound, entity.BaseResponse{
+			Status: "Not Found",
+			Code:   http.StatusNotFound,
+			Errors: "No data found with that parameter",
+		})
+	}
+	// sending response
+	go utility.NewLogEntry(ctx).Info("200 - Ok")
+	return ctx.JSON(http.StatusOK, entity.BaseResponse{
+		Status: "Ok",
+		Code:   http.StatusOK,
+		Data:   fmt.Sprintf("%d Document Deleted Successfully", deletedIDs),
 	})
 }
