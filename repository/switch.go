@@ -9,6 +9,7 @@ import (
 	model "github.com/salamanderman234/peripheral-api/models"
 	utility "github.com/salamanderman234/peripheral-api/utility"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -52,10 +53,10 @@ func (s *switchRepository) BatchInsertSwitches(ctx context.Context, switches []m
 	return result.InsertedIDs, nil
 }
 
-func (s *switchRepository) UpdateSwitch(ctx context.Context, updateField model.Switch, filter model.Switch) (int64, error) {
+func (s *switchRepository) UpdateSwitch(ctx context.Context, updateField model.Switch, filter primitive.M) (int64, error) {
 	// convert into bson
 	filterBson := bson.M{
-		"slug": filter.Slug,
+		"$and": []primitive.M{filter},
 	}
 	// set updateat
 	now := time.Now().Format(time.RFC1123)

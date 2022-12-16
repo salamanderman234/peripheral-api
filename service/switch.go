@@ -8,6 +8,7 @@ import (
 	"github.com/salamanderman234/peripheral-api/domain"
 	"github.com/salamanderman234/peripheral-api/entity"
 	model "github.com/salamanderman234/peripheral-api/models"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type switchService struct {
@@ -25,6 +26,9 @@ func (s *switchService) GetSwitch(ctx context.Context, filter entity.Switch) ([]
 	var filterModel model.Switch
 	temp, _ := json.Marshal(filter)
 	json.Unmarshal(temp, &filterModel)
+	if filter.Slug != "" {
+		filterModel.Slug = filter.Slug
+	}
 	// calling repo
 	switches, err := s.repository.FindAllSwitchWithFilter(ctx, filterModel)
 	if err != nil {
@@ -70,20 +74,28 @@ func (s *switchService) CreateOneSwitch(ctx context.Context, switchEntity entity
 	return nil
 }
 
+// ganti filter menjadi map agar bisa diencode menjadi bson
 func (s *switchService) UpdateSwitch(ctx context.Context, updateField entity.Switch, filter entity.Switch) (int64, error) {
 	// init
 	var updateFieldModel model.Switch
-	var filterModel model.Switch
+	var filterModel primitive.M
 	// creating new slug if there any new name
 	if updateField.Name != "" {
 		updateField.Slug = strings.Join(strings.Split(strings.ToLower(updateField.Name), " "), "-")
 	}
+	// making sure slug is empty
+	if updateField.Slug != "" {
+		updateField.Slug = ""
+	}
 	// convert to model
 	temp, _ := json.Marshal(updateField)
 	json.Unmarshal(temp, &updateFieldModel)
+	// karena json encode di etity diset tidask ada maka harus dilakukan secara manual
 	temp, _ = json.Marshal(filter)
 	json.Unmarshal(temp, &filterModel)
-
+	if filter.Slug != "" {
+		filterModel["slug"] = filter.Slug
+	}
 	// calling repo
 	modifiedDocuments, err := s.repository.UpdateSwitch(ctx, updateFieldModel, filterModel)
 	if err != nil {

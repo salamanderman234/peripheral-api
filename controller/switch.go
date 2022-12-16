@@ -46,7 +46,7 @@ func (s *switchController) GetOneSwitch(ctx echo.Context) error {
 		})
 	}
 	// return response
-	go utility.NewLogEntry(ctx).Error("200 - Ok")
+	go utility.NewLogEntry(ctx).Info("200 - Ok")
 	return ctx.JSON(http.StatusOK, entity.BaseResponse{
 		Code:   http.StatusOK,
 		Status: "Ok",
@@ -151,6 +151,7 @@ func (s *switchController) UpdateOneSwitch(ctx echo.Context) error {
 
 	// get updatefield from body
 	err := ctx.Bind(&body)
+	fmt.Println(body)
 	if err != nil || ctx.Request().ContentLength == 0 {
 		go utility.NewLogEntry(ctx).Error("400 - Bad Request")
 		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
@@ -169,6 +170,7 @@ func (s *switchController) UpdateOneSwitch(ctx echo.Context) error {
 			Errors: policyCheckResult,
 		})
 	}
+
 	// calling service
 	filter.Slug = ctx.Param("slug")
 	modifiedDocument, err := s.service.UpdateSwitch(ctx.Request().Context(), body, filter)

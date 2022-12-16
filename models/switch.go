@@ -1,7 +1,7 @@
 package model
 
 type Switch struct {
-	Slug            string   `json:"slug,omitempty" bson:"slug,omitempty"`
+	Slug            string   `json:"-" bson:"slug,omitempty"`
 	Name            string   `json:"name,omitempty" bson:"name,omitempty"`
 	Manufacturer    string   `json:"manufacturer,omitempty" bson:"manufacturer,omitempty"`
 	Type            string   `json:"type,omitempty" bson:"type,omitempty"`
