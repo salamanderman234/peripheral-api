@@ -21,7 +21,7 @@ func NewSwitchService(repo domain.SwitchRepository) domain.SwitchService {
 	}
 }
 
-func (s *switchService) GetSwitch(ctx context.Context, filter entity.Switch) ([]entity.Switch, error) {
+func (s *switchService) GetSwitch(ctx context.Context, filter entity.Switch, sort string) ([]entity.Switch, error) {
 	// converting entity to model
 	var filterModel model.Switch
 	temp, _ := json.Marshal(filter)
@@ -30,7 +30,7 @@ func (s *switchService) GetSwitch(ctx context.Context, filter entity.Switch) ([]
 		filterModel.Slug = filter.Slug
 	}
 	// calling repo
-	switches, err := s.repository.FindAllSwitchWithFilter(ctx, filterModel)
+	switches, err := s.repository.FindAllSwitchWithFilter(ctx, filterModel, sort)
 	if err != nil {
 		return nil, err
 	}

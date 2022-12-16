@@ -27,7 +27,7 @@ func (s *switchController) GetOneSwitch(ctx echo.Context) error {
 	filter.Slug = ctx.Param("slug")
 
 	// calling service
-	foundSwitch, err := s.service.GetSwitch(ctx.Request().Context(), filter)
+	foundSwitch, err := s.service.GetSwitch(ctx.Request().Context(), filter, "")
 	if err != nil {
 		go utility.NewLogEntry(ctx).Error("500 - Internal Server Error")
 		return ctx.JSON(http.StatusInternalServerError, entity.BaseResponse{
@@ -58,12 +58,12 @@ func (s *switchController) GetAllSwitch(ctx echo.Context) error {
 	// init
 	var filter entity.Switch
 	var foundSwitches []entity.Switch
-
+	var sort string
 	// get filter from query, body or path params
 	ctx.Bind(&filter)
-
+	sort = ctx.QueryParam("sort")
 	// calling service
-	foundSwitches, err := s.service.GetSwitch(ctx.Request().Context(), filter)
+	foundSwitches, err := s.service.GetSwitch(ctx.Request().Context(), filter, sort)
 	if err != nil {
 		go utility.NewLogEntry(ctx).Error("500 - Internal Server Error")
 		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{

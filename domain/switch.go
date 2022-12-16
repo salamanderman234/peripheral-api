@@ -14,11 +14,11 @@ type SwitchRepository interface {
 	BatchInsertSwitches(ctx context.Context, switchs []model.Switch) ([]interface{}, error)
 	UpdateSwitch(ctx context.Context, updateField model.Switch, filter primitive.M) (int64, error)
 	DeleteSwitch(ctx context.Context, condition string) (int64, error)
-	FindAllSwitchWithFilter(ctx context.Context, filter model.Switch) ([]model.Switch, error)
+	FindAllSwitchWithFilter(ctx context.Context, filter model.Switch, sort string) ([]model.Switch, error)
 }
 
 type SwitchService interface {
-	GetSwitch(ctx context.Context, filter entity.Switch) ([]entity.Switch, error)
+	GetSwitch(ctx context.Context, filter entity.Switch, sort string) ([]entity.Switch, error)
 	CreateSwitch(ctx context.Context, switchs []entity.Switch) ([]interface{}, error)
 	CreateOneSwitch(ctx context.Context, switchEntity entity.Switch) error
 	UpdateSwitch(ctx context.Context, updateField entity.Switch, filter entity.Switch) (int64, error)

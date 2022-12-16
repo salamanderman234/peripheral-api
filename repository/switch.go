@@ -86,7 +86,7 @@ func (s *switchRepository) DeleteSwitch(ctx context.Context, condition string) (
 	return result.DeletedCount, nil
 }
 
-func (s *switchRepository) FindAllSwitchWithFilter(ctx context.Context, filter model.Switch) ([]model.Switch, error) {
+func (s *switchRepository) FindAllSwitchWithFilter(ctx context.Context, filter model.Switch, sort string) ([]model.Switch, error) {
 	// init
 	var switches []model.Switch
 
@@ -104,9 +104,16 @@ func (s *switchRepository) FindAllSwitchWithFilter(ctx context.Context, filter m
 	if filter.ActuationForce != 0.0 {
 		filterBson["actuation_force"] = filter.ActuationForce
 	}
+	// makin sorting field
+	sortBson := bson.D{
+		{Key: sort, Value: 1},
+		{Key: "name", Value: 1},
+		{Key: "updateat", Value: -1},
+	}
+	opts := options.Find().SetSort(sortBson)
 
 	// query
-	cur, err := s.collection.Find(ctx, filterBson, nil)
+	cur, err := s.collection.Find(ctx, filterBson, opts)
 	if err != nil {
 		go utility.NewLogEntry(nil).Error(err)
 		return switches, err
