@@ -1,12 +1,11 @@
 package model
 
 type Switch struct {
-	SwitchID     string `json:"switch_id" bson:"switch_id,omitempty"`
-	Name         string `json:"name,omitempty" bson:"name,omitempty"`
-	Manufacturer string `json:"manufacturer,omitempty" bson:"manufacturer,omitempty"`
-	Type         string `json:"type,omitempty" bson:"type,omitempty"`
-	StemType     string `json:"stem_type,omitempty" bson:"stem_type,omitempty"`
-	// harus diginikan agar bisa kosong secara default saat json
+	SwitchID        string         `json:"switch_id,omitempty" bson:"switch_id,omitempty"`
+	Name            string         `json:"name,omitempty" bson:"name,omitempty"`
+	Manufacturer    string         `json:"manufacturer,omitempty" bson:"manufacturer,omitempty"`
+	Type            string         `json:"type,omitempty" bson:"type,omitempty"`
+	StemType        string         `json:"stem_type,omitempty" bson:"stem_type,omitempty"`
 	HousingColor    *HousingSwitch `json:"housing_color,omitempty" bson:"housing_color,omitempty"`
 	StemColor       string         `json:"stem_color,omitempty" bson:"stem_color,omitempty"`
 	RgbOption       bool           `json:"rgb_option,omitempty" bson:"rgb_option,omitempty"`

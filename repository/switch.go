@@ -54,11 +54,15 @@ func (s *switchRepository) BatchInsertSwitches(ctx context.Context, switches []m
 	return result.InsertedIDs, nil
 }
 
-func (s *switchRepository) UpdateSwitch(ctx context.Context, updateField model.Switch, filter primitive.M) (int64, error) {
+func (s *switchRepository) UpdateSwitch(ctx context.Context, updateField model.Switch, filter model.Switch) (int64, error) {
 	// convert into bson
+	var filterFieldBson bson.M
+	temp, _ := bson.Marshal(filter)
+	bson.Unmarshal(temp, &filterFieldBson)
 	filterBson := bson.M{
-		"$and": []primitive.M{filter},
+		"$and": []primitive.M{filterFieldBson},
 	}
+
 	// set updateat
 	now := time.Now().Format(time.RFC1123)
 	updateField.UpdateAt = now
@@ -93,19 +97,8 @@ func (s *switchRepository) FindAllSwitchWithFilter(ctx context.Context, filter m
 
 	// making filter
 	filterBson := bson.M{}
-	if filter.SwitchID != "" {
-		filterBson["switch_id"] = filter.SwitchID
-	}
-	if filter.Type != "" {
-		filterBson["type"] = filter.Type
-	}
-	if filter.Manufacturer != "" {
-		filterBson["manufacturer"] = filter.Manufacturer
-	}
-	if filter.ActuationForce != 0.0 {
-		filterBson["actuation_force"] = filter.ActuationForce
-	}
-
+	temp, _ := bson.Marshal(filter)
+	bson.Unmarshal(temp, &filterBson)
 	// makin sorting field
 	defaultSort := "manufacturer"
 	if sort != "" {
@@ -130,6 +123,18 @@ func (s *switchRepository) FindAllSwitchWithFilter(ctx context.Context, filter m
 		go utility.NewLogEntry(nil).Error(err)
 		return switches, err
 	}
-
 	return switches, nil
+}
+
+func (s *switchRepository) CountSwitchWithFilter(ctx context.Context, filter model.Switch) (int64, error) {
+	var filterBson bson.D
+	temp, _ := bson.Marshal(filter)
+	bson.Unmarshal(temp, &filterBson)
+
+	count, err := s.collection.CountDocuments(ctx, filterBson)
+	if err != nil {
+		go utility.NewLogEntry(nil).Error(err)
+		return 0, err
+	}
+	return count, nil
 }

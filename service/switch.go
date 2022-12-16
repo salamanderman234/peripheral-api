@@ -3,13 +3,11 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/salamanderman234/peripheral-api/domain"
 	"github.com/salamanderman234/peripheral-api/entity"
 	model "github.com/salamanderman234/peripheral-api/models"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type switchService struct {
@@ -27,9 +25,6 @@ func (s *switchService) GetSwitch(ctx context.Context, filter entity.Switch, sor
 	var filterModel model.Switch
 	temp, _ := json.Marshal(filter)
 	json.Unmarshal(temp, &filterModel)
-	if filter.SwitchID != "" {
-		filterModel.SwitchID = filter.SwitchID
-	}
 	// calling repo
 	switches, err := s.repository.FindAllSwitchWithFilter(ctx, filterModel, sort)
 	if err != nil {
@@ -78,7 +73,7 @@ func (s *switchService) CreateOneSwitch(ctx context.Context, switchEntity entity
 func (s *switchService) UpdateSwitch(ctx context.Context, updateField entity.Switch, filter entity.Switch) (int64, error) {
 	// init
 	var updateFieldModel model.Switch
-	var filterModel primitive.M
+	var filterModel model.Switch
 	// making sure slug is empty
 	if updateField.SwitchID != "" {
 		updateField.SwitchID = ""
@@ -93,7 +88,6 @@ func (s *switchService) UpdateSwitch(ctx context.Context, updateField entity.Swi
 	// karena json encode di etity diset tidask ada maka harus dilakukan secara manual
 	temp, _ = json.Marshal(filter)
 	json.Unmarshal(temp, &filterModel)
-	fmt.Println(filterModel)
 	// calling repo
 	modifiedDocuments, err := s.repository.UpdateSwitch(ctx, updateFieldModel, filterModel)
 	if err != nil {
@@ -108,4 +102,41 @@ func (s *switchService) DeleteSwitch(ctx context.Context, filter string) (int64,
 		return deletedCount, err
 	}
 	return deletedCount, nil
+}
+
+func (s *switchService) CountSwitch(ctx context.Context, filter entity.Switch) (int64, error) {
+	// converting entity to model
+	var filterModel model.Switch
+	temp, _ := json.Marshal(filter)
+	json.Unmarshal(temp, &filterModel)
+
+	result, err := s.repository.CountSwitchWithFilter(ctx, filterModel)
+	if err != nil {
+		return 0, err
+	}
+	return result, nil
+}
+
+func (s *switchService) FindSimilarSwitch(ctx context.Context, switchEntity entity.Switch) ([]entity.Switch, error) {
+	// making filter
+	filterModel := model.Switch{
+		Name: switchEntity.Name,
+	}
+	// find switch
+	result, err := s.repository.FindAllSwitchWithFilter(ctx, filterModel, "")
+	if err != nil {
+		return nil, err
+	}
+	// decode to entity
+	var entitiesResult []entity.Switch
+	temp, _ := json.Marshal(result)
+	json.Unmarshal(temp, &entitiesResult)
+	// removing same switch as filter
+	for index, element := range entitiesResult {
+		if element == switchEntity {
+			entitiesResult = append(entitiesResult[:index], entitiesResult[index+1:]...)
+			break
+		}
+	}
+	return entitiesResult, nil
 }

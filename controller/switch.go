@@ -7,7 +7,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/salamanderman234/peripheral-api/domain"
 	"github.com/salamanderman234/peripheral-api/entity"
-	"github.com/salamanderman234/peripheral-api/policy"
 	utility "github.com/salamanderman234/peripheral-api/utility"
 )
 
@@ -95,7 +94,7 @@ func (s *switchController) GetAllSwitch(ctx echo.Context) error {
 func (s *switchController) CreateNewSwitch(ctx echo.Context) error {
 	// init
 	var body []entity.Switch
-	var policyResults []*policy.SwitchPolicy
+	var policyResults []*entity.SwitchPolicy
 
 	// binding
 	if err := ctx.Bind(&body); err != nil || len(body) == 0 {
@@ -109,7 +108,16 @@ func (s *switchController) CreateNewSwitch(ctx echo.Context) error {
 
 	// checking input policy
 	for _, element := range body {
-		result := policy.DocumentSwitchPolicy(ctx.Request().Context(), element, s.service, "insert")
+		similarSwitch, err := s.service.FindSimilarSwitch(ctx.Request().Context(), element)
+		if err != nil {
+			go utility.NewLogEntry(ctx).Error("500 - Internal Server Error")
+			return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
+				Status: "Internal Server Error",
+				Code:   http.StatusInternalServerError,
+				Errors: "Something Went Wrong",
+			})
+		}
+		result := element.SwitchInsertValidation(similarSwitch)
 		if result != nil {
 			policyResults = append(policyResults, result)
 		}
@@ -160,13 +168,22 @@ func (s *switchController) UpdateOneSwitch(ctx echo.Context) error {
 		})
 	}
 	// checking policy
-	policyCheckResult := policy.DocumentSwitchPolicy(ctx.Request().Context(), body, s.service, "update")
-	if policyCheckResult != nil {
+	similarSwitch, err := s.service.FindSimilarSwitch(ctx.Request().Context(), body)
+	if err != nil {
+		go utility.NewLogEntry(ctx).Error("500 - Internal Server Error")
+		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
+			Status: "Internal Server Error",
+			Code:   http.StatusInternalServerError,
+			Errors: "Something Went Wrong",
+		})
+	}
+	result := body.SwitchUpdateValidation(similarSwitch)
+	if result != nil {
 		go utility.NewLogEntry(ctx).Error("400 - Bad Request")
 		return ctx.JSON(http.StatusBadRequest, entity.BaseResponse{
 			Status: "Bad Request",
 			Code:   http.StatusBadRequest,
-			Errors: policyCheckResult,
+			Errors: result,
 		})
 	}
 

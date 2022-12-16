@@ -6,15 +6,15 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/salamanderman234/peripheral-api/entity"
 	model "github.com/salamanderman234/peripheral-api/models"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type SwitchRepository interface {
 	InsertSwitch(ctx context.Context, newSwitch model.Switch) error
 	BatchInsertSwitches(ctx context.Context, switchs []model.Switch) ([]interface{}, error)
-	UpdateSwitch(ctx context.Context, updateField model.Switch, filter primitive.M) (int64, error)
+	UpdateSwitch(ctx context.Context, updateField model.Switch, filter model.Switch) (int64, error)
 	DeleteSwitch(ctx context.Context, condition string) (int64, error)
 	FindAllSwitchWithFilter(ctx context.Context, filter model.Switch, sort string) ([]model.Switch, error)
+	CountSwitchWithFilter(ctx context.Context, filter model.Switch) (int64, error)
 }
 
 type SwitchService interface {
@@ -23,6 +23,8 @@ type SwitchService interface {
 	CreateOneSwitch(ctx context.Context, switchEntity entity.Switch) error
 	UpdateSwitch(ctx context.Context, updateField entity.Switch, filter entity.Switch) (int64, error)
 	DeleteSwitch(ctx context.Context, filter string) (int64, error)
+	CountSwitch(ctx context.Context, filter entity.Switch) (int64, error)
+	FindSimilarSwitch(ctx context.Context, switchEntity entity.Switch) ([]entity.Switch, error)
 }
 
 type SwitchController interface {
