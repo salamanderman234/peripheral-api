@@ -13,6 +13,7 @@ func createJwtClaims(user model.User) entity.JWTClaims {
 	claims := entity.JWTClaims{
 		user.Username,
 		jwt.RegisteredClaims{
+			ID:        user.ID.Hex(),
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(5 * time.Hour)),
 		},
 	}
@@ -28,3 +29,7 @@ func CreateJwtToken(user model.User) (string, error) {
 	}
 	return token, nil
 }
+
+// func CheckJwtToken(token string) bool {
+
+// }

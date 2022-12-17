@@ -2,11 +2,13 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/salamanderman234/peripheral-api/config"
 	"github.com/salamanderman234/peripheral-api/domain"
 	model "github.com/salamanderman234/peripheral-api/models"
+	"github.com/salamanderman234/peripheral-api/utility"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -38,7 +40,8 @@ func (a *authRepository) GetUserByCredentials(ctx context.Context, username stri
 	var resultModel model.User
 	filter := bson.M{"username": username, "password": password}
 	err := a.collection.FindOne(ctx, filter).Decode(&resultModel)
-	if err != nil {
+	if err != nil && !errors.Is(err, mongo.ErrNoDocuments) {
+		go utility.NewLogEntry(nil).Error(err)
 		return model.User{}, err
 	}
 	return resultModel, nil

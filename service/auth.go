@@ -24,6 +24,10 @@ func (a *authService) Authenticate(ctx context.Context, cred entity.Credentials)
 		return "", err
 	}
 
+	if user.Username == "" {
+		return "", nil
+	}
+
 	token, err := utility.CreateJwtToken(user)
 	if err != nil {
 		return "", err
