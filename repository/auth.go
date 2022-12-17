@@ -6,6 +6,7 @@ import (
 	"github.com/salamanderman234/peripheral-api/config"
 	"github.com/salamanderman234/peripheral-api/domain"
 	model "github.com/salamanderman234/peripheral-api/models"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -23,8 +24,18 @@ func NewAuthRepository(client *mongo.Client) domain.AuthRepository {
 }
 
 func (a *authRepository) CreateNewUser(ctx context.Context, user model.User) (model.User, error) {
-	return model.User{}, nil
+	_, err := a.collection.InsertOne(ctx, user)
+	if err != nil {
+		return model.User{}, err
+	}
+	return user, nil
 }
 func (a *authRepository) GetUserByUsername(ctx context.Context, username string) (model.User, error) {
-	return model.User{}, nil
+	var resultModel model.User
+	filter := bson.M{"username": username}
+	err := a.collection.FindOne(ctx, filter).Decode(&resultModel)
+	if err != nil {
+		return model.User{}, err
+	}
+	return resultModel, nil
 }
