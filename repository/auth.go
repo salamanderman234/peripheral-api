@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/salamanderman234/peripheral-api/config"
 	"github.com/salamanderman234/peripheral-api/domain"
@@ -24,15 +25,18 @@ func NewAuthRepository(client *mongo.Client) domain.AuthRepository {
 }
 
 func (a *authRepository) CreateNewUser(ctx context.Context, user model.User) (model.User, error) {
+	now := time.Now().Format(time.RFC1123)
+	user.CreatedAt = now
+	user.UpdateAt = now
 	_, err := a.collection.InsertOne(ctx, user)
 	if err != nil {
 		return model.User{}, err
 	}
 	return user, nil
 }
-func (a *authRepository) GetUserByUsername(ctx context.Context, username string) (model.User, error) {
+func (a *authRepository) GetUserByCredentials(ctx context.Context, username string, password string) (model.User, error) {
 	var resultModel model.User
-	filter := bson.M{"username": username}
+	filter := bson.M{"username": username, "password": password}
 	err := a.collection.FindOne(ctx, filter).Decode(&resultModel)
 	if err != nil {
 		return model.User{}, err

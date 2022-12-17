@@ -15,5 +15,5 @@ type Credentials struct {
 
 type JWTClaims struct {
 	Username string `json:"username"`
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 }

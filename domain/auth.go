@@ -10,7 +10,7 @@ import (
 
 type AuthRepository interface {
 	CreateNewUser(ctx context.Context, user model.User) (model.User, error)
-	GetUserByUsername(ctx context.Context, username string) (model.User, error)
+	GetUserByCredentials(ctx context.Context, username string, password string) (model.User, error)
 }
 
 type AuthService interface {
