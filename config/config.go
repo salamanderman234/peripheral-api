@@ -16,6 +16,10 @@ const (
 	AuthCollection     = "users"
 )
 
+func GetAppSecretKey() string {
+	return viper.GetString("app.secret_key")
+}
+
 func GetDatabaseUri() string {
 	driver := viper.GetString("database.driver")
 	// username := viper.GetString("database.username")

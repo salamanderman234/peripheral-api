@@ -12,6 +12,7 @@
 		"url": "/api",
 		"version": "1",
 		"port": "your application port",
-		"name": "periapi"
+		"name": "periapi",
+		"secret_key": "secret key for jwt"
 	}
 }
