@@ -38,8 +38,13 @@ func main() {
 	}
 	// dependency injection
 	switchRepository := repository.NewSwitchRepository(client)
+	authRepository := repository.NewAuthRepository(client)
+
 	switchService := service.NewSwitchService(switchRepository)
+	authService := service.NewAuthService(authRepository)
+
 	switchController := controller.NewSwitchController(switchService)
+	authController := controller.NewAuthController(authService)
 
 	// router configuration
 	router := echo.New()
@@ -47,10 +52,12 @@ func main() {
 	router.Use(middleware.Log)
 
 	// router handler
-	var routersList []domain.Router
-	// /api/v1/
 	group := router.Group(config.CreateAppPath(""))
-	routersList = append(routersList, route.NewSwitchRoute(group, switchController))
+	routersList := []domain.Router{
+		route.NewSwitchRoute(group, switchController),
+		route.NewAuthRoute(group, authController),
+	}
+	// /api/v1/
 	for _, router := range routersList {
 		router.RegisterRoutes()
 	}

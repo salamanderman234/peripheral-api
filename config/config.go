@@ -13,6 +13,7 @@ const (
 	SwitchesCollection = "switches"
 	KeyboardCollection = "keyboards"
 	MouseCollection    = "mouses"
+	AuthCollection     = "users"
 )
 
 func GetDatabaseUri() string {
